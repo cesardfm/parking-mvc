@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- Stat Card Fragment -->
+<div th:fragment="stat-card(icon, title, value, color)" 
+     th:with="colorClass=${color == 'primary' ? 'from-primary-500 to-primary-600' : 
+                          color == 'success' ? 'from-success-500 to-success-600' : 
+                          color == 'warning' ? 'from-warning-500 to-warning-600' : 
+                          'from-accent-500 to-accent-600'}">
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all">
+        <div class="flex items-start justify-between">
+            <div class="flex-1">
+                <p class="text-sm font-medium text-gray-600 mb-1" th:text="${title}">Título</p>
+                <p class="text-3xl font-bold text-gray-900" th:text="${value}">0</p>
+            </div>
+            <div th:class="'w-12 h-12 bg-gradient-to-br ' + ${colorClass} + ' rounded-xl flex items-center justify-center shadow-sm'">
+                <span class="text-2xl" th:text="${icon}">📊</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Empty State Fragment -->
+<div th:fragment="empty-state(icon, title, description, buttonText, buttonUrl)" 
+     class="text-center py-12 px-4">
+    <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-6">
+        <span class="text-4xl" th:text="${icon}">📭</span>
+    </div>
+    <h3 class="text-xl font-bold text-gray-900 mb-2" th:text="${title}">No hay datos</h3>
+    <p class="text-gray-600 mb-6 max-w-md mx-auto" th:text="${description}">
+        Descripción del estado vacío
+    </p>
+    <a th:if="${buttonUrl}" 
+       th:href="${buttonUrl}" 
+       class="inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold px-6 py-3 rounded-xl transition-all transform hover:scale-105 shadow-md">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span th:text="${buttonText}">Crear nuevo</span>
+    </a>
+</div>
+
+<!-- Alert Fragment -->
+<div th:fragment="alert(type, message)" 
+     th:with="bgClass=${type == 'success' ? 'bg-success-50 border-success-200' : 
+                        type == 'error' ? 'bg-danger-50 border-danger-200' : 
+                        type == 'warning' ? 'bg-warning-50 border-warning-200' : 
+                        'bg-primary-50 border-primary-200'},
+              textClass=${type == 'success' ? 'text-success-800' : 
+                          type == 'error' ? 'text-danger-800' : 
+                          type == 'warning' ? 'text-warning-800' : 
+                          'text-primary-800'},
+              iconPath=${type == 'success' ? 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' : 
+                         type == 'error' ? 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z' : 
+                         type == 'warning' ? 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' : 
+                         'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'}"
+     th:class="'flex items-start gap-3 p-4 rounded-xl border ' + ${bgClass}">
+    <svg th:class="'w-6 h-6 flex-shrink-0 ' + ${textClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" th:attr="d=${iconPath}"/>
+    </svg>
+    <p th:class="'flex-1 font-medium ' + ${textClass}" th:text="${message}">Mensaje</p>
+</div>
+
+<!-- Card Container Fragment -->
+<div th:fragment="card-container" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div th:replace="${content}">
+        <!-- Content goes here -->
+    </div>
+</div>
+
+</html>

@@ -1,0 +1,104 @@
+ <!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/dashboard :: layout(
+          pageTitle='Gestión de Parqueaderos', 
+          activeMenu='parkings',
+          contentTemplate=~{::content})}">
+<head>
+    <!-- Esta sección será reemplazada por el layout -->
+</head>
+<body>
+    <!-- Fragment de contenido -->
+    <div th:fragment="content">
+        <!-- Parkings Grid -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Lista de Parqueaderos</h3>
+                        <p class="text-sm text-gray-600 mt-1">Administra todos los parqueaderos del sistema</p>
+                    </div>
+                    <a sec:authorize="hasAnyRole('OWNER')" href="/parking/nuevo" 
+                       class="inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold px-4 py-2 rounded-xl transition-all transform hover:scale-105 shadow-md">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Nuevo Parqueadero
+                    </a>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <!-- Success Message -->
+                <div th:if="${mensaje}" class="mb-6">
+                    <div th:replace="~{fragments/cards :: alert(type='success', message=${mensaje})}"></div>
+                </div>
+                
+                <!-- Parkings List -->
+                <div th:if="${!parkings.isEmpty()}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div th:each="parking : ${parkings}" 
+                         class="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-5 hover:shadow-medium hover:border-primary-200 transition-all group cursor-pointer">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1">
+                                <h4 class="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors" 
+                                    th:text="${parking.name}">
+                                    Nombre del Parqueadero
+                                </h4>
+                                <p class="text-sm text-gray-600 mt-1 flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    <span th:text="${parking.address}">Dirección</span>
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-sm">
+                                <span class="text-2xl">🅿️</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-4 text-sm text-gray-600 mt-4 pt-4 border-t border-gray-200">
+                            <div class="flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                                </svg>
+                                <span>0 niveles</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>0 espacios</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-2 mt-4">
+                            <a th:href="@{/parking/{id}(id=${parking.id})}" 
+                               class="flex-1 text-center px-3 py-2 bg-primary-50 hover:bg-primary-100 text-primary-700 font-medium rounded-lg transition-colors text-sm">
+                                Ver detalles
+                            </a>
+                            <button class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Empty State -->
+                <div sec:authorize="hasAnyRole('OWNER')" th:if="${parkings.isEmpty()}">
+                    <div th:replace="~{fragments/cards :: empty-state(
+                        icon='🅿️', 
+                        title='No hay parqueaderos registrados', 
+                        description='Comienza creando tu primer parqueadero para gestionar los espacios de estacionamiento.',
+                        buttonText='Crear Parqueadero',
+                        buttonUrl='/parking/nuevo')}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

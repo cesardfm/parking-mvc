@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/dashboard :: layout(
+          pageTitle='Nuevo Parqueadero', 
+          activeMenu='parkings',
+          contentTemplate=~{::content})}">
+<head>
+    <!-- Esta sección será reemplazada por el layout -->
+</head>
+<body>
+    <!-- Fragment de contenido -->
+    <div th:fragment="content">
+        <div class="max-w-3xl mx-auto">
+            <!-- Header Section -->
+            <div class="mb-8">
+                <div class="flex items-center gap-4 mb-4">
+                    <a href="/parking/listar" 
+                       class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </a>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Crear Nuevo Parqueadero</h1>
+                        <p class="text-gray-600 mt-1">Ingresa la información básica del parqueadero</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Form Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <form th:action="@{/parking/crear}" method="post" class="p-8">
+                    <!-- Error Alert -->
+                    <div th:if="${error}" class="mb-6">
+                        <div th:replace="~{fragments/cards :: alert(type='error', message=${error})}"></div>
+                    </div>
+                    
+                    <!-- Success Alert -->
+                    <div th:if="${mensaje}" class="mb-6">
+                        <div th:replace="~{fragments/cards :: alert(type='success', message=${mensaje})}"></div>
+                    </div>
+                    
+                    <!-- Form Fields -->
+                    <div class="space-y-6">
+                        <!-- Parking Name -->
+                        <div>
+                            <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
+                                🅿️ Nombre del Parqueadero *
+                            </label>
+                            <input type="text" 
+                                   id="name" 
+                                   name="name" 
+                                   required
+                                   placeholder="Ej: Parqueadero Centro Comercial"
+                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all text-gray-900 placeholder-gray-400">
+                        </div>
+                        
+                        <!-- Address -->
+                        <div>
+                            <label for="address" class="block text-sm font-semibold text-gray-700 mb-2">
+                                📍 Dirección *
+                            </label>
+                            <input type="text" 
+                                   id="address" 
+                                   name="address" 
+                                   required
+                                   placeholder="Ej: Calle 123 #45-67, Bogotá"
+                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all text-gray-900 placeholder-gray-400">
+                        </div>
+                        
+                        <!-- Coordinates Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
+                            <div>
+                                <label for="lat" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    🌐 Latitud *
+                                </label>
+                                <input type="number" 
+                                       id="lat" 
+                                       name="lat" 
+                                       step="0.0000001"
+                                       required
+                                       placeholder="4.711"
+                                       class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all text-gray-900 placeholder-gray-400">
+                                <p class="mt-2 text-xs text-gray-500">Coordenada de latitud GPS</p>
+                            </div>
+                            
+                            <div>
+                                <label for="lng" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    🌐 Longitud *
+                                </label>
+                                <input type="number" 
+                                       id="lng" 
+                                       name="lng" 
+                                       step="0.0000001"
+                                       required
+                                       placeholder="-74.072"
+                                       class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all text-gray-900 placeholder-gray-400">
+                                <p class="mt-2 text-xs text-gray-500">Coordenada de longitud GPS</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Help Text -->
+                        <div class="flex items-start gap-3 p-4 bg-primary-50 rounded-xl border border-primary-100">
+                            <svg class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-primary-900 mb-1">Ayuda con coordenadas</p>
+                                <p class="text-sm text-primary-700">
+                                    Puedes obtener las coordenadas GPS desde Google Maps haciendo clic derecho en la ubicación y seleccionando las coordenadas.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="flex items-center gap-3 mt-8 pt-6 border-t border-gray-200">
+                        <button type="submit" 
+                                class="flex-1 sm:flex-initial bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold px-8 py-3 rounded-xl transition-all transform hover:scale-105 shadow-md flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Crear Parqueadero
+                        </button>
+                        
+                        <a href="/parking/listar" 
+                           class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

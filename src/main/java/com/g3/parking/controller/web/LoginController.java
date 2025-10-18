@@ -1,4 +1,4 @@
-package com.g3.parking.controller;
+package com.g3.parking.controller.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +13,6 @@ public class LoginController {
 
     @GetMapping("/home")
     public String home() {
-        return "test"; // después del login redirige aquí
+        return "dashboard"; // después del login redirige aquí
     }
 }
