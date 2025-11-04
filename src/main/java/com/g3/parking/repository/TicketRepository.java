@@ -10,4 +10,6 @@ import com.g3.parking.model.Ticket;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByVehicle_LicensePlate(String licensePlate);
     Optional<Ticket> findByPaidFalseAndVehicle_LicensePlate(String licensePlate);
+    List<Ticket> findByParking_Id(Long parkingId);
+    Optional<Ticket> findById(Long id);
 }

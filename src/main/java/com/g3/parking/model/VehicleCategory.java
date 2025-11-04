@@ -1,5 +1,7 @@
 package com.g3.parking.model;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,5 +19,5 @@ public class VehicleCategory {
     private String name; // Moto, Carro, Camion
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private double rate_per_hour; // Tarifa por hora
+    private BigDecimal rate_per_hour; // Tarifa por hora
 }

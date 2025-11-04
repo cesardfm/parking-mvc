@@ -51,18 +51,20 @@ public class VehicleService {
         
         return vehicleRepository.save(vehicle);
     }
+
+    public Vehicle getVehicleById(Long id) {
+        return vehicleRepository.findById(id)
+            .orElseThrow(() -> new IllegalStateException("Vehículo no encontrado"));
+    }
+
+    public Vehicle getVehicleByIdAndOwner_Id(Long id, Long ownerId) {
+        return vehicleRepository.findByIdAndOwner_Id(id, ownerId)
+            .orElseThrow(() -> new IllegalStateException("Vehículo del dueño no encontrado"));
+    }
     
-    // Obtener o crear vehículo (para visitantes)
-    public Vehicle getOrCreateVehicle(String licensePlate, String color, Long categoryId) {
-        // Buscar si ya existe
-        Optional<Vehicle> existing = vehicleRepository.findByLicensePlate(licensePlate);
-        
-        if (existing.isPresent()) {
-            return existing.get();
-        }
-        
-        // No existe, crear como visitante
-        return registerVehicle(licensePlate, color, categoryId, null);
+    // crear vehículo
+    public Vehicle CreateVehicle(String licensePlate, String color, Long categoryId, Long ownerId) {
+        return registerVehicle(licensePlate, color, categoryId, ownerId);
     }
     
     // Vincular vehículo a usuario

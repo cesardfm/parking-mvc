@@ -11,6 +11,7 @@ import com.g3.parking.model.Vehicle;
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     Optional<Vehicle> findByLicensePlate(String licensePlate);
     List<Vehicle> findByOwner_Id(Long ownerId);
+    Optional<Vehicle> findByIdAndOwner_Id(Long id, Long ownerId);
     long countByCategory_Id(Long categoryId);
 
     List<Vehicle> findByOwnerIsNull(); // Vehículos sin dueño (visitantes)

@@ -1,5 +1,6 @@
 package com.g3.parking.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -23,10 +24,13 @@ public class UserSubscription {
     private Plan plan;
 
     @Column(nullable = false)
-    private LocalDateTime startDate;
+    private LocalDateTime activationDate;
 
     @Column(nullable = false)
-    private LocalDateTime endDate;
+    private int duracionMeses;
+
+    @Column(precision = 10, scale = 2, nullable = false) // 10 dígitos en total, 2 decimales
+    private BigDecimal precio;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -35,7 +39,7 @@ public class UserSubscription {
     // Método para saber si expiró
     @Transient 
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(endDate);
+        return LocalDateTime.now().isAfter(activationDate.plusMonths(duracionMeses));
     }
 }
 
