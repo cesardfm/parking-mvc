@@ -15,24 +15,21 @@ import com.g3.parking.repository.OrganizationRepository;
 import com.g3.parking.repository.ParkingRepository;
 import com.g3.parking.repository.PlanRepository;
 import com.g3.parking.repository.RoleRepository;
-import com.g3.parking.repository.SubscriptionRepository;
+import com.g3.parking.repository.UserSubscriptionRepository;
 import com.g3.parking.repository.TicketRepository;
 import com.g3.parking.repository.UserRepository;
-import com.g3.parking.repository.UserSubscriptionRepository;
 import com.g3.parking.repository.VehicleCategoryRepository;
 import com.g3.parking.repository.VehicleRepository;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.security.access.method.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.context.annotation.Bean;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
-import java.util.concurrent.Flow.Subscription;
 
 @SpringBootApplication
 public class ParkingApplication {
@@ -192,17 +189,17 @@ public class ParkingApplication {
 			// ==================== CREAR CATEGORIAS ====================
 			VehicleCategory category1 = new VehicleCategory();
 			category1.setName("Carro");
-			category1.setRate_per_hour(new BigDecimal("3200.00"));
+			category1.setRatePerHour(new BigDecimal("3200.00"));
 			categoryRepo.save(category1);
 
 			VehicleCategory category2 = new VehicleCategory();
 			category2.setName("Motocicleta");
-			category2.setRate_per_hour(new BigDecimal("2200.00"));
+			category2.setRatePerHour(new BigDecimal("2200.00"));
 			categoryRepo.save(category2);
 
 			VehicleCategory category3 = new VehicleCategory();
 			category3.setName("Camión");
-			category3.setRate_per_hour(new BigDecimal("4500.00"));
+			category3.setRatePerHour(new BigDecimal("4500.00"));
 			categoryRepo.save(category3);
 
 			// ==================== CREAR VEHICULOS ====================

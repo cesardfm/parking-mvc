@@ -63,7 +63,7 @@ public class VehicleService {
     }
     
     // crear vehículo
-    public Vehicle CreateVehicle(String licensePlate, String color, Long categoryId, Long ownerId) {
+    public Vehicle createVehicle(String licensePlate, String color, Long categoryId, Long ownerId) {
         return registerVehicle(licensePlate, color, categoryId, ownerId);
     }
     
@@ -124,7 +124,7 @@ public class VehicleService {
     // Buscar vehículo por placa
     public Vehicle getVehicleByPlate(String licensePlate) {
         return vehicleRepository.findByLicensePlate(licensePlate)
-            .orElseThrow(() -> new IllegalStateException("Vehículo con placa " + licensePlate + " no encontrado"));
+            .orElse(null);
     }
     
     // Verificar disponibilidad de placa

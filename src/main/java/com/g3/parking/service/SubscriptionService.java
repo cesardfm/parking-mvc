@@ -13,7 +13,7 @@ public class SubscriptionService {
     
     public UserSubscription getActiveSubscription(Long userId) {
         UserSubscription subscription = subscriptionRepository
-            .findByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE.name())
+            .findByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE)
             .orElse(null);
         
         if (subscription != null && subscription.isExpired()) {

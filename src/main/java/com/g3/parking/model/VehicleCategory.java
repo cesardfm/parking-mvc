@@ -3,12 +3,18 @@ package com.g3.parking.model;
 import java.math.BigDecimal;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name="vehicle_categories")
 public class VehicleCategory {
     @Id
@@ -19,5 +25,5 @@ public class VehicleCategory {
     private String name; // Moto, Carro, Camion
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal rate_per_hour; // Tarifa por hora
+    private BigDecimal ratePerHour; // Tarifa por hora
 }

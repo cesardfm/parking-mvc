@@ -1,6 +1,7 @@
 package com.g3.parking.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +20,15 @@ public class TicketService {
     @Autowired
     private UserSubscriptionService userSubscriptionService;
 
+    
     public List<Ticket> findByParking_Id(Long parkingId) {
         return ticketRepository.findByParking_Id(parkingId);
     }
 
     public Ticket findById(Long id) {
-        return ticketRepository.findById(id)
-        .orElseThrow(() -> new IllegalStateException("Tiquete no encontrado"));
+        Ticket ticket = ticketRepository.findById(id)
+                    .orElseThrow(() -> new IllegalStateException("Tiquete no encontrado"));
+        return ticket;
     }
 
     public BigDecimal calculateTotalPartial(Ticket ticket) {
@@ -34,10 +37,10 @@ public class TicketService {
         }
 
         long durationInHours = java.time.Duration.between(ticket.getEntryTime(), ticket.getExitTime()).toHours();
-        BigDecimal ratePerHour = ticket.getVehicle().getCategory().getRate_per_hour();
+        BigDecimal ratePerHour = ticket.getVehicle().getCategory().getRatePerHour();
         BigDecimal totalPartial = ratePerHour.multiply(BigDecimal.valueOf(durationInHours));
         
-        return totalPartial;
+        return totalPartial.setScale(2, RoundingMode.HALF_UP);
     }
 
     public BigDecimal calculateTotalAmount(Ticket ticket) {
@@ -49,7 +52,7 @@ public class TicketService {
             totalAmount = totalAmount.subtract(discountAmount);
         }
 
-        return totalAmount;
+        return totalAmount.setScale(2, RoundingMode.HALF_UP);
     }
 
     public BigDecimal calculateDiscount(User owner, BigDecimal totalPartial) {
@@ -64,6 +67,10 @@ public class TicketService {
                 discount = totalPartial.multiply(discount_percent);
             }
         }
-        return discount;
+        return discount.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public Ticket save(Ticket ticket) {
+        return ticketRepository.save(ticket);
     }
 }
