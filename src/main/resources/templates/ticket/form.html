@@ -19,7 +19,7 @@
         <div class="mb-8">
           <div class="flex items-center gap-4 mb-4">
             <a
-              href="/tickets/listarParkings"
+              th:href="${ticket == null} ? @{/tickets/{parkingId}(parkingId=${parking.id})} : @{/tickets/{parkingId}(parkingId=${ticket.parking.id})}"
               class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <svg
@@ -37,9 +37,10 @@
               </svg>
             </a>
             <div>
-              <h1 class="text-2xl font-bold text-gray-900">
-                Crear Nuevo Tiquete
-              </h1>
+              <h1
+                class="text-2xl font-bold text-gray-900"
+                th:text="${ticket == null} ? 'Crear Nuevo Tiquete':'Editar Tiquete'"
+              ></h1>
               <p class="text-gray-600 mt-1">
                 Ingresa la información básica del tiquete
               </p>
@@ -51,7 +52,7 @@
         <div
           class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
         >
-          <form th:action="@{/tickets/crear}" method="post" class="p-8">
+          <form th:action="${ticket == null} ? @{/tickets/crear} : @{/tickets/actualizar/{id}(id=${ticket.id})}" method="post" class="p-8">
             <!-- Error Alert -->
             <div th:if="${error}" class="mb-6">
               <div
@@ -82,6 +83,7 @@
                     type="text"
                     id="licensePlate"
                     name="licensePlate"
+                    th:value="${ticket == null} ? '' : ${ticket.vehicle.licensePlate}"
                     required
                     placeholder="Ej: AFQ523"
                     class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all text-gray-900 placeholder-gray-400"
@@ -100,6 +102,7 @@
                     type="text"
                     id="color"
                     name="color"
+                    th:value="${ticket == null} ? '' : ${ticket.vehicle.color}"
                     required
                     placeholder="Ej: Azul, rojo, amarillo"
                     class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all text-gray-900 placeholder-gray-400"
@@ -124,6 +127,7 @@
                       th:each="category: ${categories}"
                       th:value="${category.id}"
                       th:text="${category.name}"
+                      th:selected="${ticket?.vehicle?.category?.id == category.id}"
                     ></option>
                   </select>
                 </div>
@@ -133,15 +137,34 @@
                   for="entryTime"
                   class="block text-sm font-semibold text-gray-700 mb-2"
                 >
-                  Hora de Entrada *
+                  Hora de Entrada
                 </label>
                 <input
                   type="datetime-local"
                   id="entryTime"
                   name="entryTime"
-                  required
                   readonly
-                  th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd''T''HH:mm')}"
+                  th:value="${ticket == null} ? ${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd''T''HH:mm')} : ${#temporals.format(ticket.entryTime, 'yyyy-MM-dd''T''HH:mm')}"
+                  class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-700 cursor-not-allowed opacity-75"
+                />
+                <p class="mt-2 text-xs text-gray-500">
+                  Se ingresa automáticamente.
+                </p>
+              </div>
+
+              <div th:if="${ticket != null}">
+                <label
+                  for="entryTime"
+                  class="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                  Hora de Salida
+                </label>
+                <input
+                  type="datetime-local"
+                  id="entryTime"
+                  name="entryTime"
+                  readonly
+                  th:value="${#temporals.format(ticket.exitTime, 'yyyy-MM-dd''T''HH:mm')}"
                   class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-700 cursor-not-allowed opacity-75"
                 />
                 <p class="mt-2 text-xs text-gray-500">
@@ -150,54 +173,46 @@
               </div>
 
               <div>
-                <label
-                  for="parkingId"
-                  class="block text-sm font-semibold text-gray-700 mb-2"
-                >
-                  Parqueadero *
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  Parqueadero
                 </label>
                 <input
                   type="hidden"
                   id="parkingId"
                   name="parkingId"
-                  required
+                  th:value="${ticket == null} ? ${parking.id} : ${ticket.parking.id} "
+                />
+                <input
+                  type="text"
+                  id="id"
                   readonly
-                  th:value="${parking.id}"
-                  th:text="${parking.name}"
+                  th:value="${ticket == null} ? ${parking.name} : ${ticket.parking.name} "
                   class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-700 cursor-not-allowed opacity-75"
                 />
               </div>
-            </div>
 
-            <!-- Help Text -->
-            <!-- <div
-                class="flex items-start gap-3 p-4 bg-primary-50 rounded-xl border border-primary-100"
-              >
-                <svg
-                  class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <div th:if="${ticket != null}">
+                <label
+                  for="paid"
+                  class="block text-sm font-semibold text-gray-700 mb-2"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <div class="flex-1">
-                  <p class="text-sm font-medium text-primary-900 mb-1">
-                    Ayuda con coordenadas
-                  </p>
-                  <p class="text-sm text-primary-700">
-                    Puedes obtener las coordenadas GPS desde Google Maps
-                    haciendo clic derecho en la ubicación y seleccionando las
-                    coordenadas.
-                  </p>
-                </div>
+                  Pagado
+                </label>
+                <select
+                  id="paid"
+                  name="paid"
+                  required
+                  class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all"
+                >
+                  <option value="true" th:selected="${ticket.paid == true}">
+                    Si
+                  </option>
+                  <option value="false" th:selected="${ticket.paid == false}">
+                    No
+                  </option>
+                </select>
               </div>
-            </div> -->
+            </div>
 
             <!-- Form Actions -->
             <div
@@ -220,7 +235,9 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                Generar Tiquete
+                <span
+                  th:text="${ticket != null} ? 'Actualizar Tiquete' : 'Generar Tiquete'"
+                ></span>
               </button>
 
               <a

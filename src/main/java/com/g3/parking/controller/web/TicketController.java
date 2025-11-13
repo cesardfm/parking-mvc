@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.g3.parking.model.Parking;
 import com.g3.parking.model.Ticket;
 import com.g3.parking.model.User;
 import com.g3.parking.model.Vehicle;
@@ -26,6 +27,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @Controller
 @RequestMapping("/tickets")
@@ -65,9 +69,15 @@ public class TicketController {
     public String listarTickets(@PathVariable Long parkingId,
             Model model,
             @ModelAttribute("currentUser") User currentUser) {
+
+        Parking parking = parkingService.findById(parkingId); // ← Una sola consulta
+        if (parking == null) {
+            model.addAttribute("error", "Parking no encontrado");
+            return "redirect:/tickets/listarParkings";
+        }
         model.addAttribute("tickets", ticketService.findByParking_Id(parkingId));
-        model.addAttribute("parkingId", parkingService.findById(parkingId).getId());
-        model.addAttribute("parkingName", parkingService.findById(parkingId).getName());
+        model.addAttribute("parkingId", parking.getId());
+        model.addAttribute("parkingName", parking.getName());
         return "ticket/list";
     }
 
@@ -150,7 +160,6 @@ public class TicketController {
         }
     }
 
-    // Mostrar formulario para crear parking
     // Mostrar formulario para crear ticket
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/nuevo/{parkingId}")
@@ -202,6 +211,40 @@ public class TicketController {
             model.addAttribute("error", "Error al crear el ticket: " + e.getMessage());
             model.addAttribute("parkings", parkingService.findByUserOrganization(currentUser));
             model.addAttribute("categories", vehicleCategoryService.getAll());
+            return "ticket/form";
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
+    @GetMapping("/editar/{id}")
+    public String mostrarFormularioEditar(@PathVariable("id") Long id, Model model,
+            @ModelAttribute("currentUser") User currentUser) {
+        
+        Ticket ticket = ticketService.findById(id);
+        if (ticket == null) {
+            model.addAttribute("error", "Ticket no encontrado");
+            return "redirect:/tickets/listarParkings";
+        }
+        model.addAttribute("ticket", ticket);
+        model.addAttribute("categories", vehicleCategoryService.getAll());
+        return "ticket/form";
+    }
+
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
+    @PutMapping("/actualizar/{id}")
+    public String actualizarTicket(@PathVariable Long id, Model model, @ModelAttribute("currentUser") User currentUser) {
+        try {
+        Ticket ticket = ticketService.findById(id);
+
+        if (ticket == null){
+            return "ticket/form";
+        }
+
+        ticketService.
+        return "redirect:/tickets/detail/" + id;
+        
+        } catch (Exception e){
+            model.addAttribute("error", "Error al actualizar el tiquete");
             return "ticket/form";
         }
     }

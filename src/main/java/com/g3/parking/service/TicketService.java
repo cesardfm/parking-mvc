@@ -27,7 +27,7 @@ public class TicketService {
 
     public Ticket findById(Long id) {
         Ticket ticket = ticketRepository.findById(id)
-                    .orElseThrow(() -> new IllegalStateException("Tiquete no encontrado"));
+                    .orElse(null);
         return ticket;
     }
 

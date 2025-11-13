@@ -22,7 +22,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
                         </p>
                     </div>
                     <div class="flex gap-2">
-                        <a th:href="@{/ticket/editar/{id}(id=${id})}" 
+                        <a th:href="@{/tickets/editar/{id}(id=${id})}" 
                            class="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors font-medium">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -153,7 +153,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
                             </svg>
                             Tiempo Entrada
                         </label>
-                        <p class="text-gray-900" th:text="${vehicle_entry_time} ?: 'No especificada'">No especificada</p>
+                        <p class="text-gray-900" th:text="${vehicle_entry_time} ? ${#temporals.format(vehicle_entry_time, 'dd-MM-yyyy HH:mm')} : 'No especificada'">No especificada</p>
                     </div>
 
                     <!-- Tiempo Salida -->
@@ -166,7 +166,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
                             </svg>
                             Tiempo Salida
                         </label>
-                        <p class="text-gray-900" th:text="${vehicle_exit_time} ?: '-'">-</p>
+                        <p class="text-gray-900" th:text="${vehicle_entry_time} ? ${#temporals.format(vehicle_exit_time, 'dd-MM-yyyy HH:mm')} : '-'">-</p>
                     </div>
                     <!-- Total Parcial-->
                     <div>
