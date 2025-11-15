@@ -36,7 +36,7 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login")              // tu login personalizado
                 .loginProcessingUrl("/login")     // donde Spring recibe credenciales
-                .defaultSuccessUrl("/home", true) // redirección al loguear
+                .defaultSuccessUrl("/dashboard", true) // redirección al loguear
                 .failureUrl("/login?error=true")
                 .permitAll())
             .logout(logout -> logout.permitAll());

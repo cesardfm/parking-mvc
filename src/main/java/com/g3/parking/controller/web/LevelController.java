@@ -3,14 +3,18 @@ package com.g3.parking.controller.web;
 import com.g3.parking.model.Level;
 import com.g3.parking.model.Parking;
 import com.g3.parking.model.Site;
+import com.g3.parking.model.User;
 import com.g3.parking.repository.LevelRepository;
 import com.g3.parking.repository.ParkingRepository;
 import com.g3.parking.repository.SiteRepository;
+import com.g3.parking.service.UserService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +38,16 @@ public class LevelController {
     
     @Autowired
     private SiteRepository siteRepository;
+
+     @Autowired
+    private UserService userService;
+
+    @ModelAttribute("currentUser")
+    public User getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null)
+            return null;
+        return userService.findByUsername(userDetails.getUsername());
+    }
     
     // Mostrar paleta de colores
     @GetMapping
@@ -95,7 +109,7 @@ public class LevelController {
     // Ver detalles de un nivel
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/{id}")
-    public String verDetalleNivel(@PathVariable Long id, Model model) {
+    public String verDetalleNivel(@PathVariable Long id, Model model, @ModelAttribute("currentUser") User currentUser) {
         Optional<Level> levelOpt = levelRepository.findById(id);
         
         if (levelOpt.isEmpty()) {
@@ -106,6 +120,11 @@ public class LevelController {
         Level level = levelOpt.get();
         model.addAttribute("level", level);
         model.addAttribute("sites", level.getSites());
+
+        User user = userService.findByUsername(currentUser.getUsername());
+        if (user.hasRole("ROLE_ADMIN")) {
+            return "admin/level-detail-admin";
+        }
       
         return "level/detail";
     }

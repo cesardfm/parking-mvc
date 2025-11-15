@@ -92,6 +92,18 @@ public class ParkingController {
         return "parking/list";
     }
 
+    // Listar parkings que administra el usuario (ADMIN)
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/adminlist")
+    public String listarParkingsAdmin(Model model, @ModelAttribute("currentUser") User currentUser) {
+        if (currentUser == null) {
+            model.addAttribute("error", "Usuario no autenticado");
+            return "redirect:/login";
+        }
+        model.addAttribute("parkings", parkingService.findByAdmin(currentUser));
+        return "parking/list";
+    }
+
     // Ver detalles de un parking específico
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/{id}")

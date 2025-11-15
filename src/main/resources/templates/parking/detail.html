@@ -22,7 +22,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
                         </p>
                     </div>
                     <div class="flex gap-2">
-                        <a th:href="@{/parking/editar/{id}(id=${parking.id})}" 
+                        <a sec:authorize="hasAnyRole('OWNER')" th:href="@{/parking/editar/{id}(id=${parking.id})}" 
                            class="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors font-medium">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -187,7 +187,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
                             Total: <span class="font-semibold" th:text="${#lists.size(levels)}">0</span> niveles
                         </p>
                     </div>
-                    <button onclick="toggleFormNivel()" 
+                    <button sec:authorize="hasAnyRole('OWNER')" onclick="toggleFormNivel()" 
                             class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all transform hover:scale-105 shadow-md font-medium">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -198,7 +198,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
             </div>
 
             <!-- Formulario para añadir nivel (inicialmente oculto) -->
-            <div id="formNivel" class="hidden border-b border-gray-200 bg-gray-50">
+            <div sec:authorize="hasAnyRole('OWNER')" id="formNivel" class="hidden border-b border-gray-200 bg-gray-50">
                 <div class="px-6 py-5">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Nuevo Nivel</h3>
                     <form th:action="@{/levels/crear}" method="post" class="space-y-4">
@@ -276,14 +276,16 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
                     </svg>
                     <h3 class="text-lg font-medium text-gray-900 mb-2">No hay niveles creados</h3>
-                    <p class="text-gray-500 mb-6">Añade el primer nivel para este parqueadero</p>
-                    <button onclick="toggleFormNivel()" 
-                            class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        Añadir Primer Nivel
-                    </button>
+                    <div sec:authorize="hasAnyRole('OWNER')" >
+                        <p class="text-gray-500 mb-6">Añade el primer nivel para este parqueadero</p>
+                        <button onclick="toggleFormNivel()" 
+                                class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Añadir Primer Nivel
+                        </button>
+                    </div>
                 </div>
 
                 <div th:if="${!#lists.isEmpty(levels)}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

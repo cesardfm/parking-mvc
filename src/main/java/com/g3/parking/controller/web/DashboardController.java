@@ -28,7 +28,12 @@ public class DashboardController {
     @GetMapping("/dashboard")
     public String dashboard(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         // Últimos parqueaderos (máximo 5)
+        if (userDetails == null)
+            return "/login";
         User user = userService.findByUsername(userDetails.getUsername());
+        if (user.hasRole("ROLE_ADMIN")){
+            return "admin/dashboard";
+        }
         model.addAttribute("recentParkings", parkingService.findByUserOrganization(user));
         
         return "dashboard";

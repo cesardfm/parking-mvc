@@ -130,4 +130,17 @@ public class ParkingService {
         parking.removeAdmin(admin);
         parkingRepository.save(parking);
     }
+
+    // Obtener parkings que administra un usuario (admin)
+    public List<Parking> findByAdmin(User admin) {
+        if (admin == null) {
+            throw new IllegalArgumentException("Admin no puede ser null");
+        }
+        return parkingRepository.findByAdminsContaining(admin);
+    }
+
+    public List<Parking> findByAdminId(Long adminId) {
+        if (adminId == null) throw new IllegalArgumentException("adminId no puede ser null");
+        return parkingRepository.findByAdmins_Id(adminId);
+    }
 }

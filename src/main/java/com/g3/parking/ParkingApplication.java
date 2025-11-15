@@ -94,7 +94,7 @@ public class ParkingApplication {
             owner2.setUsername("owner2");
             owner2.setPassword(encoder.encode("1234"));
             owner2.setRoles(Set.of(ownerRole));
-            owner2.setOrganization(org1); // Otra organización
+            owner2.setOrganization(org2); // Otra organización
             owner2.setActive(true);
             userRepo.save(owner2);
 

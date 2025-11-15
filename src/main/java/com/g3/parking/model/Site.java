@@ -1,6 +1,7 @@
 package com.g3.parking.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "sites")
@@ -22,6 +23,12 @@ public class Site {
     @ManyToOne
     @JoinColumn(name = "level_id")
     private Level level;
+
+    @Column(name = "vehicle_type")
+    private String vehicleType;
+
+    @Column(name = "entry_time")
+    private LocalDateTime entryTime;
     
     // Constructores
     public Site() {
@@ -72,5 +79,21 @@ public class Site {
     
     public void setLevel(Level level) {
         this.level = level;
+    }
+
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
+    }
+
+    public LocalDateTime getEntryTime() {
+        return entryTime;
+    }
+
+    public void setEntryTime(LocalDateTime entryTime) {
+        this.entryTime = entryTime;
     }
 }
