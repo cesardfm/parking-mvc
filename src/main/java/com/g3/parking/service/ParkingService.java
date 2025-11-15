@@ -18,6 +18,14 @@ public class ParkingService {
     
     @Autowired
     private UserRepository userRepository;
+
+    public List<Parking> findAll() {
+        return parkingRepository.findAll();
+    }
+
+    public Parking findById(Long parkingId){
+        return parkingRepository.findById(parkingId).orElse(null);
+    }
     
     // Buscar parking y validar que pertenece a la organización del usuario
     public Parking findByIdAndValidateOrganization(Long parkingId, User currentUser) {

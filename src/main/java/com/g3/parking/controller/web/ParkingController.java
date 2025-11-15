@@ -85,7 +85,7 @@ public class ParkingController {
     }
     
     // Listar todos los parkings
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/listar")
     public String listarParkings(Model model, @ModelAttribute("currentUser") User currentUser) {
         model.addAttribute("parkings", parkingService.findByUserOrganization(currentUser));
