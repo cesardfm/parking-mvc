@@ -5,6 +5,7 @@ import com.g3.parking.model.Organization;
 import com.g3.parking.model.Parking;
 import com.g3.parking.model.Plan;
 import com.g3.parking.model.Role;
+import com.g3.parking.model.Site;
 import com.g3.parking.model.Ticket;
 import com.g3.parking.model.User;
 import com.g3.parking.model.UserSubscription;
@@ -15,6 +16,7 @@ import com.g3.parking.repository.OrganizationRepository;
 import com.g3.parking.repository.ParkingRepository;
 import com.g3.parking.repository.PlanRepository;
 import com.g3.parking.repository.RoleRepository;
+import com.g3.parking.repository.SiteRepository;
 import com.g3.parking.repository.UserSubscriptionRepository;
 import com.g3.parking.repository.TicketRepository;
 import com.g3.parking.repository.UserRepository;
@@ -49,6 +51,7 @@ public class ParkingApplication {
 						  TicketRepository ticketRepo,
 						  PlanRepository planRepo,
 						  UserSubscriptionRepository userSubscriptionRepo,
+						  SiteRepository siteRepo,
                           PasswordEncoder encoder) {
         return args -> {
             // ==================== CREAR ROLES ====================
@@ -142,16 +145,40 @@ public class ParkingApplication {
 			// ==================== CREAR NIVELES ====================
 
 			Level level1 = new Level();
-			level1.setColumns(5);
-			level1.setRows(10);
+			level1.setColumns(2);
+			level1.setRows(2);
 			level1.setParking(parking1);
 			levelRepo.save(level1);
 
-			Level level2 = new Level();
-			level2.setColumns(4);
-			level2.setRows(8);
-			level2.setParking(parking2);
-			levelRepo.save(level2);
+			// ==================== CREAR SITIOS ====================
+
+			Site site_1_1 = new Site();
+			site_1_1.setLevel(level1);
+			site_1_1.setPosX(1);
+			site_1_1.setPosY(1);
+			site_1_1.setStatus("disabled");
+			siteRepo.save(site_1_1);
+
+			Site site_1_2 = new Site();
+			site_1_2.setLevel(level1);
+			site_1_2.setPosX(1);
+			site_1_2.setPosY(2);
+			site_1_2.setStatus("disabled");
+			siteRepo.save(site_1_2);
+
+			Site site_2_1 = new Site();
+			site_2_1.setLevel(level1);
+			site_2_1.setPosX(2);
+			site_2_1.setPosY(1);
+			site_2_1.setStatus("available");
+			siteRepo.save(site_2_1);
+
+			Site site_2_2 = new Site();
+			site_2_2.setLevel(level1);
+			site_2_2.setPosX(2);
+			site_2_2.setPosY(2);
+			site_2_2.setStatus("available");
+			siteRepo.save(site_2_2);
 
 			// ==================== CREAR PLANES ====================
 			Plan planBasic = new Plan();
@@ -190,16 +217,19 @@ public class ParkingApplication {
 			VehicleCategory category1 = new VehicleCategory();
 			category1.setName("Carro");
 			category1.setRatePerHour(new BigDecimal("3200.00"));
+			category1.setActive(true);
 			categoryRepo.save(category1);
 
 			VehicleCategory category2 = new VehicleCategory();
 			category2.setName("Motocicleta");
 			category2.setRatePerHour(new BigDecimal("2200.00"));
+			category2.setActive(true);
 			categoryRepo.save(category2);
 
 			VehicleCategory category3 = new VehicleCategory();
 			category3.setName("Camión");
 			category3.setRatePerHour(new BigDecimal("4500.00"));
+			category3.setActive(true);
 			categoryRepo.save(category3);
 
 			// ==================== CREAR VEHICULOS ====================
@@ -213,19 +243,21 @@ public class ParkingApplication {
 			Vehicle vehicle2 = new Vehicle();
 			vehicle2.setLicensePlate("XYZ789");
 			vehicle2.setColor("Azul");
+			vehicle2.setOwner(null);
 			vehicle2.setCategory(category2);
 			vehicleRepo.save(vehicle2);
 
 			Vehicle vehicle3 = new Vehicle();
 			vehicle3.setLicensePlate("LMN456");
 			vehicle3.setColor("Blanco");
+			vehicle3.setOwner(null);
 			vehicle3.setCategory(category3);
 			vehicleRepo.save(vehicle3);
 
 			// ==================== CREAR TIQUETES ====================
 			Ticket ticket1 = new Ticket();
 			ticket1.setVehicle(vehicle1);
-			ticket1.setParking(parking1);
+			ticket1.setSite(site_1_1);
 			ticket1.setEntryTime(LocalDateTime.now().minusHours(3));
 			ticket1.setExitTime(LocalDateTime.now());
 			ticket1.setTotalAmount(new BigDecimal("9600.00"));
@@ -234,8 +266,10 @@ public class ParkingApplication {
 
 			Ticket ticket2 = new Ticket();
 			ticket2.setVehicle(vehicle2);
-			ticket2.setParking(parking1);
+			ticket2.setSite(site_1_2);
 			ticket2.setEntryTime(LocalDateTime.now().minusHours(1));
+			ticket2.setExitTime(null);
+			ticket2.setPaid(false);
 			ticketRepo.save(ticket2);
 
             System.out.println("==============================================");

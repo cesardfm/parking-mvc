@@ -9,7 +9,7 @@ import com.g3.parking.service.VehicleService;
 
 @Controller
 @RequestMapping("/vehicles")
-public class VehicleController {
+public class VehicleController extends BaseController {
     
     @Autowired
     private VehicleService vehicleService;

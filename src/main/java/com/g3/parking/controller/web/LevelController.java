@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/levels")
-public class LevelController {
+public class LevelController extends BaseController{
 
     // Crear logger
     private static final Logger log = LoggerFactory.getLogger(LevelController.class);

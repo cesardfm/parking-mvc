@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/sites")
-public class SiteController {
+public class SiteController extends BaseController {
     
     @Autowired
     private SiteRepository siteRepository;

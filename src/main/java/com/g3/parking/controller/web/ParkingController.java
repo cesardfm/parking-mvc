@@ -20,26 +20,16 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/parking")
-public class ParkingController {
+public class ParkingController extends BaseController{
     
     @Autowired
     private ParkingRepository parkingRepository;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private ParkingService parkingService;
     
     @Autowired
     private LevelRepository levelRepository;
-
-    @ModelAttribute("currentUser")
-    public User getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null)
-            return null;
-        return userService.findByUsername(userDetails.getUsername());
-    }
     
     // Mostrar formulario para crear parking
     @PreAuthorize("hasRole('OWNER')")

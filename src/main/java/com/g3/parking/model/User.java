@@ -34,6 +34,9 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+
+    //@OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = {})
+    //private Set<Vehicle> vehicles = new HashSet<>();
     
     private Boolean active = true;
     

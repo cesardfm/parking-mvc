@@ -12,10 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class DashboardController {
-    
-    @Autowired
-    private UserService userService;
+public class DashboardController extends BaseController{
 
     @Autowired
     private ParkingService parkingService;

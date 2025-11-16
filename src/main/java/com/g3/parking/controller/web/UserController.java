@@ -12,17 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/users")
-public class UserController {
-    
-    @Autowired
-    private UserService userService;
-
-    @ModelAttribute("currentUser")
-    public User getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null)
-            return null;
-        return userService.findByUsername(userDetails.getUsername());
-    }
+public class UserController extends BaseController{
     
     // Mostrar formulario para crear usuario
     @PreAuthorize("hasRole('OWNER')")

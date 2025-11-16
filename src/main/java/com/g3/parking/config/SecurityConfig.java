@@ -16,30 +16,34 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final CustomUserDetailsService customUserDetailsService;
-
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService) {
-        this.customUserDetailsService = customUserDetailsService;
-    }
+    /*
+     * private final CustomUserDetailsService customUserDetailsService;
+     * 
+     * public SecurityConfig(CustomUserDetailsService customUserDetailsService) {
+     * this.customUserDetailsService = customUserDetailsService;
+     * }
+     */
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/publico/**").permitAll()
-                .requestMatchers("/owner/**").hasRole("OWNER")
-                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "OWNER")
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")              // tu login personalizado
-                .loginProcessingUrl("/login")     // donde Spring recibe credenciales
-                .defaultSuccessUrl("/dashboard", true) // redirección al loguear
-                .failureUrl("/login?error=true")
-                .permitAll())
-            .logout(logout -> logout.permitAll());
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session
+                        .sessionFixation().migrateSession() // PREVENIR corrupción de sesión
+                        .maximumSessions(1))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/publico/**").permitAll()
+                        .requestMatchers("/owner/**").hasRole("OWNER")
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "OWNER")
+                        .anyRequest().authenticated())
+                .formLogin(form -> form
+                        .loginPage("/login") // login personalizado
+                        .loginProcessingUrl("/login") // donde Spring recibe credenciales
+                        .defaultSuccessUrl("/dashboard", true) // redirección al loguear
+                        .failureUrl("/login?error=true")
+                        .permitAll())
+                .logout(logout -> logout.permitAll());
         return http.build();
     }
 
@@ -48,17 +52,19 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(customUserDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
+    /*
+     * @Bean
+     * public DaoAuthenticationProvider authenticationProvider() {
+     * DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+     * authProvider.setUserDetailsService(customUserDetailsService);
+     * authProvider.setPasswordEncoder(passwordEncoder());
+     * return authProvider;
+     * }
+     * 
+     * @Bean
+     * public AuthenticationManager
+     * authenticationManager(AuthenticationConfiguration config) throws Exception {
+     * return config.getAuthenticationManager();
+     * }
+     */
 }
-
