@@ -125,17 +125,17 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="layout(
             </nav>
             
             <!-- User section -->
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl">
+            <a class="p-4 border-t border-gray-200 cursor-pointer" th:href="@{/users/detail/{id}(id=${currentUser.id})}">
+                <div class="flex items-center gap-3 px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-xl">
                     <div class="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center text-white font-semibold">
-                        A
+                        U
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-gray-900 truncate">Admin</p>
-                        <p class="text-xs text-gray-500 truncate">admin@parking.com</p>
+                        <p class="text-sm font-semibold text-gray-900 truncate" th:text="${currentUser != null} ? ${currentUser.username}:'Admin'"></p>
+                        <p class="text-xs text-gray-500 truncate" th:text="${currentUser != null and currentUser.organization != null} ? ${currentUser.organization.name}:'admin@parking.com'"></p>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
     </aside>
     

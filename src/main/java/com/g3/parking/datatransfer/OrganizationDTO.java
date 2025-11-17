@@ -22,7 +22,5 @@ public class OrganizationDTO {
     private String address;
     private String phone;
     private String email;
-    private Set<UserDTO> users;
-    private List<ParkingDTO> parkings;;
     private Boolean active;
 }

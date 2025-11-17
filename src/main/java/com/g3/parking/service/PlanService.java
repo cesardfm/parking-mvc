@@ -23,6 +23,13 @@ public class PlanService extends BaseService {
                 .collect(Collectors.toList());
     }
 
+    public List<PlanDTO> findAllActive() {
+        List<Plan> planes = planRepo.findByActiveTrue();
+        return planes.stream()
+                .map(plan -> convert(plan, PlanDTO.class))
+                .collect(Collectors.toList());
+    }
+
     public PlanDTO findById(Long id) {
         try {
             Plan plan = planRepo.getReferenceById(id);

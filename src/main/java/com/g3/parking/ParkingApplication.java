@@ -8,7 +8,7 @@ import com.g3.parking.model.Role;
 import com.g3.parking.model.Site;
 import com.g3.parking.model.Ticket;
 import com.g3.parking.model.User;
-import com.g3.parking.model.UserSubscription;
+import com.g3.parking.model.Subscription;
 import com.g3.parking.model.Vehicle;
 import com.g3.parking.model.VehicleCategory;
 import com.g3.parking.repository.LevelRepository;
@@ -17,7 +17,7 @@ import com.g3.parking.repository.ParkingRepository;
 import com.g3.parking.repository.PlanRepository;
 import com.g3.parking.repository.RoleRepository;
 import com.g3.parking.repository.SiteRepository;
-import com.g3.parking.repository.UserSubscriptionRepository;
+import com.g3.parking.repository.SubscriptionRepository;
 import com.g3.parking.repository.TicketRepository;
 import com.g3.parking.repository.UserRepository;
 import com.g3.parking.repository.VehicleCategoryRepository;
@@ -50,7 +50,7 @@ public class ParkingApplication {
 						  VehicleRepository vehicleRepo,
 						  TicketRepository ticketRepo,
 						  PlanRepository planRepo,
-						  UserSubscriptionRepository userSubscriptionRepo,
+						  SubscriptionRepository userSubscriptionRepo,
 						  SiteRepository siteRepo,
                           PasswordEncoder encoder) {
         return args -> {
@@ -203,12 +203,12 @@ public class ParkingApplication {
 			planRepo.save(planEnterprise);
 
 			// ==================== CREAR SUSCRIPCIONES ====================
-			UserSubscription subscription1 = new UserSubscription();
+			Subscription subscription1 = new Subscription();
 			subscription1.setUser(user1);
 			subscription1.setPlan(planBasic);
 			subscription1.setActivationDate(LocalDateTime.now().minusDays(21));
-			subscription1.setDuracionMeses(2);
-			subscription1.setPrecio(planBasic.getPrice().multiply(new BigDecimal(subscription1.getDuracionMeses())));
+			subscription1.setMonthsDuration(2);
+			subscription1.setPrice(planBasic.getPrice().multiply(new BigDecimal(subscription1.getMonthsDuration())));
 			subscription1.setStatus(com.g3.parking.model.SubscriptionStatus.ACTIVE);
 			userSubscriptionRepo.save(subscription1);
 

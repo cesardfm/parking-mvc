@@ -27,13 +27,13 @@ public class PlanController extends BaseController {
     private PlanService planService;
 
     @GetMapping("/listar")
-    public String getMethodName(Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String listar(Model model, @ModelAttribute("currentUser") User currentUser) {
         model.addAttribute("plans", planService.findAll());
         return "plan/list";
     }
 
     @GetMapping("/detail/{id}")
-    public String getMethodName(@PathVariable Long id,
+    public String detail(@PathVariable Long id,
             Model model, @ModelAttribute("currentUser") User currentUser) {
 
         model.addAttribute("plan", planService.findById(id));

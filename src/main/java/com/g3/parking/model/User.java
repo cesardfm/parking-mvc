@@ -23,7 +23,7 @@ public class User {
 
     // Un usuario pertenece a UNA organización
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id", nullable = false)
+    @JoinColumn(name = "organization_id", nullable = true)
     private Organization organization;
 
     // Un usuario tiene múltiples roles

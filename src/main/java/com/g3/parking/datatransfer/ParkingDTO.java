@@ -22,6 +22,4 @@ public class ParkingDTO {
     private String address;
     private OrganizationDTO organization;
     private UserDTO createdBy;
-    private Set<UserDTO> admins;
-    private List<LevelDTO> levels;
 }

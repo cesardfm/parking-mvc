@@ -4,6 +4,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.g3.parking.datatransfer.UserDTO;
 import com.g3.parking.model.Organization;
 import com.g3.parking.model.Role;
 import com.g3.parking.model.User;
@@ -66,5 +67,10 @@ public class UserService extends BaseService {
     
     public List<User> findByOrganization(Long organizationId) {
         return userRepository.findByOrganizationId(organizationId);
+    }
+
+    public UserDTO findById(Long userId){
+        User user = userRepository.getReferenceById(userId);
+        return convert(user, UserDTO.class);
     }
 }

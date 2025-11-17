@@ -75,4 +75,12 @@ public class UserController extends BaseController{
         model.addAttribute("users", userService.findByOrganization(currentUser.getOrganization().getId()));
         return "user/list";
     }
+
+    @GetMapping("/detail/{id}")
+    public String detail(@PathVariable Long id,
+            Model model, @ModelAttribute("currentUser") User currentUser) {
+
+        model.addAttribute("user", userService.findById(id));
+        return "user/detail";
+    }
 }
