@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional
-public class VehicleService {
+public class VehicleService extends BaseService {
 
     private static final Logger log = LoggerFactory.getLogger(TicketController.class);
     

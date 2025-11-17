@@ -8,7 +8,7 @@ import com.g3.parking.model.UserSubscription;
 import com.g3.parking.repository.UserSubscriptionRepository;
 
 @Service
-public class UserSubscriptionService {
+public class UserSubscriptionService extends BaseService{
     @Autowired
     private UserSubscriptionRepository userSubscriptionRepository;
 

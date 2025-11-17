@@ -4,37 +4,33 @@
   xmlns:th="http://www.thymeleaf.org"
   xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
   th:replace="~{layout/dashboard :: layout(
-          pageTitle='Detalles de la Categoria',
-          activeMenu='categories',
+          pageTitle='Detalles del Plan',
+          activeMenu='plans',
           contentTemplate=~{::content}
       )}"
 >
   <head>
-    <title>Detalles de la Categoria</title>
+    <title>Detalles del Plan</title>
   </head>
   <body>
     <div th:fragment="content">
-      <!-- Información de la categoria -->
+      <!-- Información -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6">
         <div class="px-6 py-5 border-b border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-2xl font-bold text-gray-900">Categoria</h1>
-              <!-- <p class="text-sm text-gray-500 mt-1">
-                ID:
-                <span th:text="${category} != null ? ${category.id} : ''"></span>
-              </p> -->
+              <h1 class="text-2xl font-bold text-gray-900">Plan</h1>
             </div>
             <div class="flex gap-2">
               <form
-                th:action="@{/categories/changeStatus/{id}(id=${id})}"
+                th:action="@{/plans/changeStatus/{id}(id=${id})}"
                 method="post"
                 style="display: inline"
               >
                 <button
                   type="submit"
                   class="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors font-medium"
-                    th:text="${category.active == false} ? 'Habilitar':'Deshabilitar'"
+                    th:text="${plan.active == false} ? 'Habilitar':'Deshabilitar'"
                 >
                   <svg
                     class="w-5 h-5"
@@ -52,7 +48,7 @@
                 </button>
               </form>
               <a
-                th:href="@{/categories/editar/{id}(id=${id})}"
+                th:href="@{/plans/editar/{id}(id=${id})}"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors font-medium"
               >
                 <svg
@@ -72,7 +68,7 @@
               </a>
 
               <a
-                th:href="@{/categories/listar}"
+                th:href="@{/plans/listar}"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
               >
                 <svg
@@ -96,7 +92,7 @@
 
         <div class="px-6 py-5 border-b border-gray-200">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- category ID -->
+            <!-- plan ID -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
                 <!-- Map pin icon -->
@@ -121,13 +117,13 @@
                 </svg>
                 ID
               </label>
-              <p class="text-gray-900" th:text="${category.id} ?: ''"></p>
+              <p class="text-gray-900" th:text="${plan.id} ?: ''"></p>
             </div>
 
-            <!-- Category name -->
+            <!-- plan name -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
-                <!-- Tag / category icon -->
+                <!-- Tag / plan icon -->
                 <svg
                   class="w-4 h-4 inline mr-1"
                   fill="none"
@@ -149,10 +145,38 @@
                 </svg>
                 Nombre
               </label>
-              <p class="text-gray-900" th:text="${category.name} ?: ''"></p>
+              <p class="text-gray-900" th:text="${plan.name} ?: ''"></p>
             </div>
 
-            <!-- category tarifa per hour -->
+            <!-- plan detalle -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                <!-- Tag / plan icon -->
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 7h.01M7 7a2 2 0 012-2h8l4 4v8a2 2 0 01-2 2h-8a2 2 0 01-2-2V7z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 7v13"
+                  />
+                </svg>
+                Descripción
+              </label>
+              <p class="text-gray-900" th:text="${plan.description} ?: ''"></p>
+            </div>
+
+            <!-- plan precio -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
                 <!-- Currency / total icon -->
@@ -175,28 +199,59 @@
                     d="M12 3v3m0 12v3"
                   />
                 </svg>
-                Tarifa Por Hora
+                Precio
               </label>
               <p
                 class="text-gray-900"
-                th:text="${category.ratePerHour} ?: ''"
+                th:text="${plan.price} ?: ''"
               ></p>
             </div>
 
-            <!-- category tarifa per hour -->
+            <!-- plan Porcentaje de Descuento -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                <!-- Currency / total icon -->
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 3v3m0 12v3"
+                  />
+                </svg>
+                Porcentaje de Descuento
+              </label>
+              <p
+                class="text-gray-900"
+                th:text="${#numbers.formatDecimal(plan.discountPercent * 100, 1, 2)} + '%'"
+              ></p>
+            </div>
+
+            <!-- plan estado -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
                 Estado
               </label>
               <p class="whitespace-nowrap">
                 <span
-                  th:if="${category.active}"
+                  th:if="${plan.active}"
                   class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
                 >
                   Habilitado
                 </span>
                 <span
-                  th:unless="${category.active}"
+                  th:unless="${plan.active}"
                   class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
                 >
                   Inavilitado

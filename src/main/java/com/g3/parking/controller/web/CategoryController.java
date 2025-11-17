@@ -82,11 +82,11 @@ public class CategoryController extends BaseController {
     }
 
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
-    @PostMapping("/changeState/{id}")
-    public String changeState(@PathVariable("id") Long id,
+    @PostMapping("/changeStatus/{id}")
+    public String changeStatus(@PathVariable("id") Long id,
             Model model, @ModelAttribute("currentUser") User currentUser) {
         
-        VehicleCategory category = categoryService.changeState(id);
+        categoryService.changeStatus(id);
         return "redirect:/categories/listar";
     }
 

@@ -20,9 +20,7 @@ import com.g3.parking.repository.SiteRepository;
 import com.g3.parking.repository.TicketRepository;
 
 @Service
-public class TicketService {
-
-    private static final Logger log = LoggerFactory.getLogger(TicketController.class);
+public class TicketService extends BaseService {
 
     @Autowired
     private TicketRepository ticketRepository;
@@ -44,7 +42,7 @@ public class TicketService {
         return ticketRepository.findBySite_Level_Parking_Id(parkingId);
     }
 
-    public boolean existAnySiteAvailableByParkingId(Long parkingId){
+    public boolean existAnySiteAvailableByParkingId(Long parkingId) {
         List<Site> sitesAvailable = siteRepository.findByStatusAndLevel_Parking_Id("available", parkingId);
         return !sitesAvailable.isEmpty();
     }
@@ -89,11 +87,7 @@ public class TicketService {
     }
 
     public BigDecimal calculateDiscount(Long ownerId, BigDecimal totalPartial) {
-        // ✅ DEBUG CRÍTICO
-        log.info("=== CALCULATE DISCOUNT DEBUG ===");
-        log.info("Owner recibido: "
-                + (ownerId != null ? "ID=" + ownerId : "null"));
-        log.info("=================================");
+
         BigDecimal discount_percent = new BigDecimal(0);
         BigDecimal discount = new BigDecimal(0);
         if (ownerId != null) {
@@ -123,13 +117,11 @@ public class TicketService {
             String entryTime,
             User currentUser) {
 
-
         // Buscar o crear vehículo
         Vehicle vehicle = vehicleService.findByLicensePlate(licensePlate);
-        if (vehicle == null ) {
+        if (vehicle == null) {
             vehicle = vehicleService.createVehicle(licensePlate, color, categoryId, null);
-        }
-        else if (!vehicle.getCategory().getId().equals(categoryId) || !vehicle.getColor().equalsIgnoreCase(color)){
+        } else if (!vehicle.getCategory().getId().equals(categoryId) || !vehicle.getColor().equalsIgnoreCase(color)) {
             return null;
         }
 
@@ -187,8 +179,6 @@ public class TicketService {
             Long ownerId = vehicleService.getVehicleOwnerId(vehicle.getId());
 
             if (ownerId != null) {
-                log.info("=== CALCULATE DISCOUNT DEBUG (SAFE) ===");
-                log.info("Owner ID obtenido: {}", ownerId);
                 discount_percent = userSubscriptionService.findByUserIdAndStatus(
                         ownerId,
                         SubscriptionStatus.ACTIVE).getPlan().getDiscountPercent();
@@ -197,7 +187,7 @@ public class TicketService {
                 }
             }
         } catch (Exception e) {
-            log.warn("Error al calcular descuento seguro: ", e);
+            return null;
         }
 
         return discount.setScale(2, RoundingMode.HALF_UP);
@@ -216,7 +206,7 @@ public class TicketService {
                 ownerName = ownerUsername;
             }
         } catch (Exception e) {
-            log.warn("Error al obtener nombre del propietario: ", e);
+
         }
         return ownerName;
     }

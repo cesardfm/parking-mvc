@@ -10,7 +10,7 @@ import com.g3.parking.model.VehicleCategory;
 import com.g3.parking.repository.VehicleCategoryRepository;
 
 @Service
-public class VehicleCategoryService {
+public class VehicleCategoryService extends BaseService {
     @Autowired
     private VehicleCategoryRepository vehicleCategoryRepo;
 
@@ -47,7 +47,7 @@ public class VehicleCategoryService {
         return vehicleCategoryRepo.save(category);
     }
 
-    public VehicleCategory changeState(Long id) {
+    public VehicleCategory changeStatus(Long id) {
         VehicleCategory category = findById(id);
         if (category != null) {
             category.setActive(!category.isActive());

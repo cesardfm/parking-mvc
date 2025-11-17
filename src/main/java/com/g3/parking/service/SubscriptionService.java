@@ -1,12 +1,14 @@
 package com.g3.parking.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.g3.parking.model.SubscriptionStatus;
 import com.g3.parking.model.UserSubscription;
 import com.g3.parking.repository.UserSubscriptionRepository;
 
-public class SubscriptionService {
+@Service
+public class SubscriptionService extends BaseService {
     
     @Autowired
     private UserSubscriptionRepository subscriptionRepository;

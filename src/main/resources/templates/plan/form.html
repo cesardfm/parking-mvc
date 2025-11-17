@@ -4,8 +4,8 @@
   xmlns:th="http://www.thymeleaf.org"
   xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
   th:replace="~{layout/dashboard :: layout(
-          pageTitle='Nueva Categoria', 
-          activeMenu='categories',
+          pageTitle='Nuevo Plan', 
+          activeMenu='plans',
           contentTemplate=~{::content})}"
 >
   <head>
@@ -19,7 +19,7 @@
         <div class="mb-8">
           <div class="flex items-center gap-4 mb-4">
             <a
-              th:href="@{/categories/listar}"
+              th:href="@{/plans/listar}"
               class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <svg
@@ -37,11 +37,11 @@
               </svg>
             </a>
             <div>
-              <h1 class="text-2xl font-bold text-gray-900" th:text="${category} == null ? 'Crear Nueva Categoria' : 'Editar Categoria'">
+              <h1 class="text-2xl font-bold text-gray-900" th:text="${plan} == null ? 'Crear Nuevo Plan' : 'Editar Plan'">
                 
               </h1>
               <p class="text-gray-600 mt-1">
-                Ingresa la información básica de la categoria
+                Ingresa la información básica del plan
               </p>
             </div>
           </div>
@@ -51,7 +51,7 @@
         <div
           class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
         >
-          <form th:action="${category == null} ? @{/categories/crear} : @{/categories/actualizar/{id}(id=${category.id})}" method="post" class="p-8">
+          <form th:action="${plan == null} ? @{/plans/crear} : @{/plans/actualizar/{id}(id=${plan.id})}" method="post" class="p-8">
             <!-- Error Alert -->
             <div th:if="${error}" class="mb-6">
               <div
@@ -82,26 +82,63 @@
                     type="text"
                     id="name"
                     name="name"
-                    th:value="${category == null} ? '':${category.name}"
+                    th:value="${plan == null} ? '':${plan.name}"
                     required
-                    placeholder="Ej: Carro, Moto"
+                    placeholder="Ej: Premium, Empresarial"
                     class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all text-gray-900 placeholder-gray-400"
                   />
                 </div>
 
                 <div>
                   <label
-                    for="ratePerHour"
+                    for="description"
                     class="block text-sm font-semibold text-gray-700 mb-2"
                   >
-                    Tarifa por Hora *
+                    Descripción *
+                  </label>
+                  <input
+                    type="text"
+                    id="description"
+                    name="description"
+                    th:value="${plan == null} ? '':${plan.description}"
+                    required
+                    placeholder="Ej: El plan consiste en ..."
+                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all text-gray-900 placeholder-gray-400"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    for="price"
+                    class="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    Precio *
                   </label>
                   <input
                     type="number"
-                    id="ratePerHour"
-                    name="ratePerHour"
-                    min="0"
-                    th:value="${category == null} ? '':${category.ratePerHour}"
+                    id="price"
+                    name="price"
+                    min="0" 
+                    th:value="${plan == null} ? '':${plan.price}"
+                    required
+                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all text-gray-900 placeholder-gray-400"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    for="discountPercent"
+                    class="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    Descuento *
+                  </label>
+                  <input
+                    type="number"
+                    id="discountPercent"
+                    name="discountPercent"
+                    min="0" 
+                    max="100"
+                    th:value="${plan == null} ? '':${plan.discountPercent * 100}"
                     required
                     class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all text-gray-900 placeholder-gray-400"
                   />
@@ -130,11 +167,11 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span th:text="${category == null} ? 'Crear':'Guardar'"></span>
+                <span th:text="${plan == null} ? 'Crear':'Guardar'"></span>
               </button>
 
               <a
-                href="/categories/listar"
+                href="/plans/listar"
                 class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors"
               >
                 Cancelar

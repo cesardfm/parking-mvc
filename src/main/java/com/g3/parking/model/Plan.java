@@ -31,6 +31,7 @@ public class Plan {
     @Column(precision = 10, scale = 2, nullable = false) // 10 dígitos en total, 2 decimales
     private BigDecimal price;
 
+    @Column(nullable = false)
     private Boolean active = true;
 
     @Column(precision = 3, scale = 2, nullable = false) // 3 dígitos en total, 2 decimales

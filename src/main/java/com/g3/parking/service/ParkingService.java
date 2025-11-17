@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class ParkingService {
+public class ParkingService extends BaseService {
     
     @Autowired
     private ParkingRepository parkingRepository;

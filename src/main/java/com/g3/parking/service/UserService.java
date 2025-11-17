@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-public class UserService {
+public class UserService extends BaseService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
@@ -28,6 +28,7 @@ public class UserService {
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.organizationRepository = organizationrRepository;
+        
     }
 
     public User findByUsername(String username) throws UsernameNotFoundException {

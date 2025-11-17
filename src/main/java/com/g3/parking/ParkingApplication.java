@@ -217,19 +217,16 @@ public class ParkingApplication {
 			VehicleCategory category1 = new VehicleCategory();
 			category1.setName("Carro");
 			category1.setRatePerHour(new BigDecimal("3200.00"));
-			category1.setActive(true);
 			categoryRepo.save(category1);
 
 			VehicleCategory category2 = new VehicleCategory();
 			category2.setName("Motocicleta");
 			category2.setRatePerHour(new BigDecimal("2200.00"));
-			category2.setActive(true);
 			categoryRepo.save(category2);
 
 			VehicleCategory category3 = new VehicleCategory();
 			category3.setName("Camión");
 			category3.setRatePerHour(new BigDecimal("4500.00"));
-			category3.setActive(true);
 			categoryRepo.save(category3);
 
 			// ==================== CREAR VEHICULOS ====================
