@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html
+  lang="es"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  th:replace="~{layout/dashboard :: layout(
+          pageTitle='Detalles de ls Suscripción',
+          activeMenu='users',
+          contentTemplate=~{::content}
+      )}"
+>
+  <head>
+    <title>Detalles de la Suscripción</title>
+  </head>
+  <body>
+    <div th:fragment="content">
+      <!-- Información -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6">
+        <div class="px-6 py-5 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">Suscripción</h1>
+            </div>
+            <div class="flex gap-2">
+              <form
+                th:action="@{/subscriptions/cancel/{id}(id=${subscription.id})}"
+                method="post"
+                style="display: inline"
+                th:if="${subscription.status.name == 'ACTIVE'}"
+              >
+                <button
+                  type="submit"
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-600 transition-colors font-medium"
+                >
+                  Cancelar Subscripción
+                </button>
+              </form>
+
+              <a
+                th:href="@{/subscriptions/listar/{userId}(userId=${subscription.user.id})}"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+              >
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+                Volver
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="px-6 py-5 border-b border-gray-200">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- subscription ID -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 7h.01M7 7a2 2 0 012-2h8l4 4v8a2 2 0 01-2 2h-8a2 2 0 01-2-2V7z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 7v13"
+                  />
+                </svg>
+                ID Subscripción
+              </label>
+              <p class="text-gray-900" th:text="${subscription.id} ?: ''"></p>
+            </div>
+
+            <!-- plan id -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                <!-- Tag / subscription icon -->
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 7h.01M7 7a2 2 0 012-2h8l4 4v8a2 2 0 01-2 2h-8a2 2 0 01-2-2V7z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 7v13"
+                  />
+                </svg>
+                ID Plan
+              </label>
+              <p
+                class="text-gray-900"
+                th:text="${subscription.plan.id} ?: ''"
+              ></p>
+            </div>
+
+            <!-- plan name -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                <!-- Tag / subscription icon -->
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 7h.01M7 7a2 2 0 012-2h8l4 4v8a2 2 0 01-2 2h-8a2 2 0 01-2-2V7z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 7v13"
+                  />
+                </svg>
+                Nombre del Plan
+              </label>
+              <p
+                class="text-gray-900"
+                th:text="${subscription.plan.name} ?: ''"
+              ></p>
+            </div>
+
+            <!-- plan detalle -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                <!-- Tag / subscription icon -->
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 7h.01M7 7a2 2 0 012-2h8l4 4v8a2 2 0 01-2 2h-8a2 2 0 01-2-2V7z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 7v13"
+                  />
+                </svg>
+                Descripción
+              </label>
+              <p
+                class="text-gray-900"
+                th:text="${subscription.plan.description} ?: ''"
+              ></p>
+            </div>
+
+            <!-- plan precio -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                <!-- Currency / total icon -->
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 3v3m0 12v3"
+                  />
+                </svg>
+                Precio Plan
+              </label>
+              <p
+                class="text-gray-900"
+                th:text="${subscription.plan.price} ?: ''"
+              ></p>
+            </div>
+
+            <!-- plan discountPercent -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                <!-- Currency / total icon -->
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 3v3m0 12v3"
+                  />
+                </svg>
+                Porcentaje Descuento
+              </label>
+              <p
+                class="text-gray-900"
+                th:text="${#numbers.formatDecimal(subscription.plan.discountPercent * 100, 1, 2)} + '%'"
+              ></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="px-6 py-5 border-b border-gray-200">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- fecha compra -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                <!-- Clock / entry time icon -->
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6v6l4 2"
+                  />
+                </svg>
+                Fecha de Compra
+              </label>
+              <p
+                class="text-gray-900"
+                th:text="${subscription.activationDate} ? ${#temporals.format(subscription.activationDate, 'dd-MM-yyyy HH:mm')} : '-'"
+              ></p>
+            </div>
+
+            <!-- duracion -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                <!-- Currency / total icon -->
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6v6l4 2"
+                  />
+                </svg>
+                Duración en Meses
+              </label>
+              <p
+                class="text-gray-900"
+                th:text="${subscription.monthsDuration} ?: ''"
+              ></p>
+            </div>
+
+            <!-- precio subscripcion -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                <!-- Currency / total icon -->
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 3v3m0 12v3"
+                  />
+                </svg>
+                Valor Pagado
+              </label>
+              <p
+                class="text-gray-900"
+                th:text="${subscription.price} ?: ''"
+              ></p>
+            </div>
+
+            <!-- subscription estado -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                <!-- Check circle / paid icon -->
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4"
+                  />
+                </svg>
+                Estado
+              </label>
+              <p>
+                <span
+                  th:if="${subscription != null}"
+                  th:text="${subscription.status ?: ''}"
+                  class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                  th:classappend="${subscription.status.name == 'ACTIVE'} ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                >
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

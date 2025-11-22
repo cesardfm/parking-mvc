@@ -26,4 +26,7 @@ public class VehicleCategory {
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal ratePerHour; // Tarifa por hora
+
+    @Column(nullable = false)
+    private boolean active = true;
 }

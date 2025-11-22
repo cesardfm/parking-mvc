@@ -21,7 +21,12 @@ public class ParkingDTO {
     private Double lng;
     private String address;
     private OrganizationDTO organization;
-    private UserDTO createdBy;
     private Set<UserDTO> admins;
     private List<LevelDTO> levels;
+    private UserDTO createdBy;
+
+    public boolean isAdminById(Long userId) {
+        return this.admins.stream()
+            .anyMatch(admin -> admin.getId().equals(userId));
+    }
 }

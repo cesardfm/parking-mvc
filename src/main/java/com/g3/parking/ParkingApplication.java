@@ -5,9 +5,10 @@ import com.g3.parking.model.Organization;
 import com.g3.parking.model.Parking;
 import com.g3.parking.model.Plan;
 import com.g3.parking.model.Role;
+import com.g3.parking.model.Site;
 import com.g3.parking.model.Ticket;
 import com.g3.parking.model.User;
-import com.g3.parking.model.UserSubscription;
+import com.g3.parking.model.Subscription;
 import com.g3.parking.model.Vehicle;
 import com.g3.parking.model.VehicleCategory;
 import com.g3.parking.repository.LevelRepository;
@@ -15,7 +16,8 @@ import com.g3.parking.repository.OrganizationRepository;
 import com.g3.parking.repository.ParkingRepository;
 import com.g3.parking.repository.PlanRepository;
 import com.g3.parking.repository.RoleRepository;
-import com.g3.parking.repository.UserSubscriptionRepository;
+import com.g3.parking.repository.SiteRepository;
+import com.g3.parking.repository.SubscriptionRepository;
 import com.g3.parking.repository.TicketRepository;
 import com.g3.parking.repository.UserRepository;
 import com.g3.parking.repository.VehicleCategoryRepository;
@@ -48,7 +50,8 @@ public class ParkingApplication {
 						  VehicleRepository vehicleRepo,
 						  TicketRepository ticketRepo,
 						  PlanRepository planRepo,
-						  UserSubscriptionRepository userSubscriptionRepo,
+						  SubscriptionRepository userSubscriptionRepo,
+						  SiteRepository siteRepo,
                           PasswordEncoder encoder) {
         return args -> {
             // ==================== CREAR ROLES ====================
@@ -142,21 +145,45 @@ public class ParkingApplication {
 			// ==================== CREAR NIVELES ====================
 
 			Level level1 = new Level();
-			level1.setColumns(5);
-			level1.setRows(10);
+			level1.setColumns(2);
+			level1.setRows(2);
 			level1.setParking(parking1);
 			levelRepo.save(level1);
 
-			Level level2 = new Level();
-			level2.setColumns(4);
-			level2.setRows(8);
-			level2.setParking(parking2);
-			levelRepo.save(level2);
+			// ==================== CREAR SITIOS ====================
+
+			Site site_1_1 = new Site();
+			site_1_1.setLevel(level1);
+			site_1_1.setPosX(1);
+			site_1_1.setPosY(1);
+			site_1_1.setStatus("disabled");
+			siteRepo.save(site_1_1);
+
+			Site site_1_2 = new Site();
+			site_1_2.setLevel(level1);
+			site_1_2.setPosX(1);
+			site_1_2.setPosY(2);
+			site_1_2.setStatus("disabled");
+			siteRepo.save(site_1_2);
+
+			Site site_2_1 = new Site();
+			site_2_1.setLevel(level1);
+			site_2_1.setPosX(2);
+			site_2_1.setPosY(1);
+			site_2_1.setStatus("available");
+			siteRepo.save(site_2_1);
+
+			Site site_2_2 = new Site();
+			site_2_2.setLevel(level1);
+			site_2_2.setPosX(2);
+			site_2_2.setPosY(2);
+			site_2_2.setStatus("available");
+			siteRepo.save(site_2_2);
 
 			// ==================== CREAR PLANES ====================
 			Plan planBasic = new Plan();
 			planBasic.setName("Básico");
-			planBasic.setDescription("Plan básico con tarifas estándar");
+			planBasic.setDescription("Plan básico con descuentos en tarifas económicas estándar");
 			planBasic.setPrice(new BigDecimal(50000));
 			planBasic.setDiscountPercent(new BigDecimal(0.10));
 			planRepo.save(planBasic);
@@ -176,14 +203,23 @@ public class ParkingApplication {
 			planRepo.save(planEnterprise);
 
 			// ==================== CREAR SUSCRIPCIONES ====================
-			UserSubscription subscription1 = new UserSubscription();
+			Subscription subscription1 = new Subscription();
 			subscription1.setUser(user1);
 			subscription1.setPlan(planBasic);
 			subscription1.setActivationDate(LocalDateTime.now().minusDays(21));
-			subscription1.setDuracionMeses(2);
-			subscription1.setPrecio(planBasic.getPrice().multiply(new BigDecimal(subscription1.getDuracionMeses())));
+			subscription1.setMonthsDuration(2);
+			subscription1.setPrice(planBasic.getPrice().multiply(new BigDecimal(subscription1.getMonthsDuration())));
 			subscription1.setStatus(com.g3.parking.model.SubscriptionStatus.ACTIVE);
 			userSubscriptionRepo.save(subscription1);
+
+			Subscription subscription2 = new Subscription();
+			subscription2.setUser(user1);
+			subscription2.setPlan(planPremium);
+			subscription2.setActivationDate(LocalDateTime.now().minusDays(32));
+			subscription2.setMonthsDuration(1);
+			subscription2.setPrice(planBasic.getPrice().multiply(new BigDecimal(subscription2.getMonthsDuration())));
+			subscription2.setStatus(com.g3.parking.model.SubscriptionStatus.EXPIRED);
+			userSubscriptionRepo.save(subscription2);
 
 
 			// ==================== CREAR CATEGORIAS ====================
@@ -213,19 +249,21 @@ public class ParkingApplication {
 			Vehicle vehicle2 = new Vehicle();
 			vehicle2.setLicensePlate("XYZ789");
 			vehicle2.setColor("Azul");
+			vehicle2.setOwner(null);
 			vehicle2.setCategory(category2);
 			vehicleRepo.save(vehicle2);
 
 			Vehicle vehicle3 = new Vehicle();
 			vehicle3.setLicensePlate("LMN456");
 			vehicle3.setColor("Blanco");
+			vehicle3.setOwner(null);
 			vehicle3.setCategory(category3);
 			vehicleRepo.save(vehicle3);
 
 			// ==================== CREAR TIQUETES ====================
 			Ticket ticket1 = new Ticket();
 			ticket1.setVehicle(vehicle1);
-			ticket1.setParking(parking1);
+			ticket1.setSite(site_1_1);
 			ticket1.setEntryTime(LocalDateTime.now().minusHours(3));
 			ticket1.setExitTime(LocalDateTime.now());
 			ticket1.setTotalAmount(new BigDecimal("9600.00"));
@@ -234,8 +272,10 @@ public class ParkingApplication {
 
 			Ticket ticket2 = new Ticket();
 			ticket2.setVehicle(vehicle2);
-			ticket2.setParking(parking1);
+			ticket2.setSite(site_1_2);
 			ticket2.setEntryTime(LocalDateTime.now().minusHours(1));
+			ticket2.setExitTime(null);
+			ticket2.setPaid(false);
 			ticketRepo.save(ticket2);
 
             System.out.println("==============================================");

@@ -1,9 +1,6 @@
 package com.g3.parking.datatransfer;
 
-import java.util.HashSet;
 import java.util.Set;
-
-import com.g3.parking.model.Organization;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,4 +18,9 @@ public class UserDTO {
     private OrganizationDTO organization;
     private Set<RoleDTO> roles;
     private Boolean active;
+
+    public boolean hasRole(String roleName) {
+        return roles.stream()
+            .anyMatch(role -> role.getName().equals(roleName));
+    }
 }

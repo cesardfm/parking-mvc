@@ -4,16 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.g3.parking.model.SubscriptionStatus;
-import com.g3.parking.model.UserSubscription;
-import com.g3.parking.repository.UserSubscriptionRepository;
+import com.g3.parking.datatransfer.SubscriptionDTO;
+import com.g3.parking.model.Subscription;
+import com.g3.parking.repository.SubscriptionRepository;
 
 @Service
-public class UserSubscriptionService {
+public class UserSubscriptionService extends BaseService{
     @Autowired
-    private UserSubscriptionRepository userSubscriptionRepository;
+    private SubscriptionRepository userSubscriptionRepository;
 
-    public UserSubscription findByUserIdAndStatus(Long userId, SubscriptionStatus status) {
-        return userSubscriptionRepository.findByUserIdAndStatus(userId, status)
+    public SubscriptionDTO findByUserIdAndStatus(Long userId, SubscriptionStatus status) {
+        Subscription subscription = userSubscriptionRepository.findByUserIdAndStatus(userId, status)
             .orElseThrow(() -> new IllegalStateException("Subscripcion no encontrada"));
+        return convert(subscription, SubscriptionDTO.class);
     }
 }

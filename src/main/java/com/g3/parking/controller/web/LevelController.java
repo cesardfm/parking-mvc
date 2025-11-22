@@ -8,9 +8,14 @@ import com.g3.parking.repository.LevelRepository;
 import com.g3.parking.repository.ParkingRepository;
 import com.g3.parking.repository.SiteRepository;
 import com.g3.parking.service.UserService;
+import com.g3.parking.datatransfer.LevelDTO;
+import com.g3.parking.datatransfer.ParkingDTO;
+import com.g3.parking.datatransfer.SiteDTO;
+import com.g3.parking.datatransfer.UserDTO;
+import com.g3.parking.service.LevelService;
+import com.g3.parking.service.ParkingService;
+import com.g3.parking.service.SiteService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,21 +25,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.Optional;
-
 @Controller
 @RequestMapping("/levels")
-public class LevelController {
-
-    // Crear logger
-    private static final Logger log = LoggerFactory.getLogger(LevelController.class);
+public class LevelController extends BaseController {
 
     @Autowired
-    private LevelRepository levelRepository;
-    
+    private LevelService levelService;
+
     @Autowired
-    private ParkingRepository parkingRepository;
-    
+    private ParkingService parkingService;
+
     @Autowired
     private SiteRepository siteRepository;
 
@@ -42,114 +42,114 @@ public class LevelController {
     private UserService userService;
 
     @ModelAttribute("currentUser")
-    public User getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+    public UserDTO getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null)
             return null;
         return userService.findByUsername(userDetails.getUsername());
     }
     
+    private SiteService siteService;
+
     // Mostrar paleta de colores
     @GetMapping
     public String mostrarPaletaColores(Model model) {
         return "levels";
     }
-    
+
     // Crear nuevo nivel
     @PreAuthorize("hasRole('OWNER')")
     @PostMapping("/crear")
     public String crearNivel(@RequestParam("parkingId") Long parkingId,
-                            @RequestParam("rows") Integer rows,
-                            @RequestParam("columns") Integer columns,
-                            RedirectAttributes redirectAttributes) {
-        
+            @RequestParam("rows") Integer rows,
+            @RequestParam("columns") Integer columns,
+            RedirectAttributes redirectAttributes) {
+
         // Validar parking
-        Optional<Parking> parkingOpt = parkingRepository.findById(parkingId);
-        if (parkingOpt.isEmpty()) {
+        ParkingDTO parking = parkingService.findById(parkingId);
+        if (parking == null) {
             redirectAttributes.addFlashAttribute("error", "Parqueadero no encontrado");
             return "redirect:/parking/listar";
         }
-        
+
         // Validar dimensiones
         if (rows == null || rows < 1 || rows > 50) {
             redirectAttributes.addFlashAttribute("error", "El número de filas debe estar entre 1 y 50");
             return "redirect:/parking/" + parkingId;
         }
-        
+
         if (columns == null || columns < 1 || columns > 50) {
             redirectAttributes.addFlashAttribute("error", "El número de columnas debe estar entre 1 y 50");
             return "redirect:/parking/" + parkingId;
         }
-        
-        Parking parking = parkingOpt.get();
-        
+
         // Crear nivel
-        Level level = new Level(columns, rows);
-        level.setParking(parking);
-        level = levelRepository.save(level);
-        
+        LevelDTO level = LevelDTO.builder()
+                .columns(columns)
+                .rows(rows)
+                .parking(parking)
+                .build();
+        level = levelService.create(level);
+
         // Crear espacios automáticamente
         for (int row = 1; row <= rows; row++) {
             for (int col = 1; col <= columns; col++) {
-                Site site = new Site();
+                SiteDTO site = new SiteDTO();
                 site.setPosX(col);
                 site.setPosY(row);
                 site.setLevel(level);
                 site.setStatus("available"); // Por defecto disponible
-                siteRepository.save(site);
+                siteService.create(site);
             }
         }
-        
-        redirectAttributes.addFlashAttribute("success", 
-            "Nivel creado exitosamente con " + (rows * columns) + " espacios");
-        
+
+        redirectAttributes.addFlashAttribute("success",
+                "Nivel creado exitosamente con " + (rows * columns) + " espacios");
+
         return "redirect:/parking/" + parkingId;
     }
-    
+
     // Ver detalles de un nivel
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/{id}")
     public String verDetalleNivel(@PathVariable Long id, Model model, @ModelAttribute("currentUser") User currentUser) {
-        Optional<Level> levelOpt = levelRepository.findById(id);
-        
-        if (levelOpt.isEmpty()) {
+        LevelDTO level = levelService.findById(id);
+
+        if (level == null) {
             model.addAttribute("error", "Nivel no encontrado");
             return "redirect:/parking/listar";
         }
-        
-        Level level = levelOpt.get();
+
         model.addAttribute("level", level);
         model.addAttribute("sites", level.getSites());
 
-        User user = userService.findByUsername(currentUser.getUsername());
+        UserDTO user = userService.findByUsername(currentUser.getUsername());
         if (user.hasRole("ROLE_ADMIN")) {
             return "admin/level-detail-admin";
         }
       
         return "level/detail";
     }
-    
+
     // Eliminar nivel
     @PreAuthorize("hasRole('OWNER')")
     @GetMapping("/eliminar/{id}")
     public String eliminarNivel(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        Optional<Level> levelOpt = levelRepository.findById(id);
-        
-        if (levelOpt.isEmpty()) {
+        LevelDTO level = levelService.findById(id);
+
+        if (level == null ) {
             redirectAttributes.addFlashAttribute("error", "Nivel no encontrado");
             return "redirect:/parking/listar";
         }
-        
-        Level level = levelOpt.get();
         Long parkingId = level.getParking().getId();
-        
+
         // Eliminar todos los sites del nivel
-        siteRepository.deleteAll(level.getSites());
-        
+        siteService.deleteAll(level.getSites());
+
         // Eliminar nivel
-        levelRepository.delete(level);
-        
+        levelService.delete(level);
+
         redirectAttributes.addFlashAttribute("success", "Nivel eliminado exitosamente");
-        
+
         return "redirect:/parking/" + parkingId;
     }
 }

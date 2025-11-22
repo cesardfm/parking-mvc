@@ -2,64 +2,61 @@ package com.g3.parking.controller.web;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+// import org.hibernate.validator.internal.util.logging.Log_.logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.g3.parking.model.Parking;
-import com.g3.parking.model.Ticket;
-import com.g3.parking.model.User;
-import com.g3.parking.model.Vehicle;
-import com.g3.parking.repository.VehicleCategoryRepository;
+import com.g3.parking.datatransfer.LevelDTO;
+import com.g3.parking.datatransfer.ParkingDTO;
+import com.g3.parking.datatransfer.RoleDTO;
+import com.g3.parking.datatransfer.TicketDTO;
+import com.g3.parking.datatransfer.UserDTO;
+import com.g3.parking.datatransfer.VehicleDTO;
+import com.g3.parking.service.LevelService;
 import com.g3.parking.service.ParkingService;
+import com.g3.parking.service.RoleService;
+import com.g3.parking.service.SiteService;
 import com.g3.parking.service.TicketService;
-import com.g3.parking.service.UserService;
 import com.g3.parking.service.VehicleCategoryService;
-import com.g3.parking.service.VehicleService;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
 
 @Controller
 @RequestMapping("/tickets")
-public class TicketController {
-    @Autowired
-    TicketService ticketService;
+public class TicketController extends BaseController {
 
     @Autowired
-    private UserService userService;
+    private TicketService ticketService;
 
     @Autowired
     private ParkingService parkingService;
 
     @Autowired
-    private VehicleService vehicleService;
-
-    @Autowired
     private VehicleCategoryService vehicleCategoryService;
 
-    @ModelAttribute("currentUser")
-    public User getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null)
-            return null;
-        return userService.findByUsername(userDetails.getUsername());
-    }
+    @Autowired
+    private LevelService levelService;
+
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
+    private SiteService siteService;
 
     // Listar todos los parkings
-    @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN','USER')")
     @GetMapping("/listarParkings")
-    public String listarParkings(Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String listarParkings(Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         model.addAttribute("parkings", parkingService.findByUserOrganization(currentUser));
         return "ticket/listParkings";
     }
@@ -68,69 +65,95 @@ public class TicketController {
     @GetMapping("/{parkingId}")
     public String listarTickets(@PathVariable Long parkingId,
             Model model,
-            @ModelAttribute("currentUser") User currentUser) {
+            @ModelAttribute("currentUser") UserDTO currentUser) {
 
-        Parking parking = parkingService.findById(parkingId); // ← Una sola consulta
+        ParkingDTO parking = parkingService.findById(parkingId);
         if (parking == null) {
             model.addAttribute("error", "Parking no encontrado");
             return "redirect:/tickets/listarParkings";
         }
-        model.addAttribute("tickets", ticketService.findByParking_Id(parkingId));
+
+        List<TicketDTO> tickets = new ArrayList<>();
+
+        System.out.println(currentUser.getRoles());
+        boolean isAdminOrOwner = currentUser.getRoles().stream()
+                .anyMatch(role -> "ROLE_ADMIN".equals(role.getName()) || "ADMIN".equals(role.getName()) || "ROLE_OWNER".equals(role.getName()) || "OWNER".equals(role.getName()));
+
+        
+        if (isAdminOrOwner) {
+            tickets = ticketService.findBySite_Level_Parking_Id(parkingId);
+        } else {
+            tickets = ticketService.findBySite_Level_Parking_IdAndVehicle_Owner_Id(parkingId, currentUser.getId());
+        }
+
+        // Forzar carga de relaciones lazy
+        for (TicketDTO ticket : tickets) {
+            if (ticket.getVehicle() != null) {
+                // Acceder a las relaciones para forzar carga
+                ticket.getVehicle().getLicensePlate();
+                if (ticket.getVehicle().getCategory() != null) {
+                    ticket.getVehicle().getCategory().getName();
+                }
+            }
+        }
+
+        model.addAttribute("tickets", tickets);
         model.addAttribute("parkingId", parking.getId());
         model.addAttribute("parkingName", parking.getName());
+        model.addAttribute("siteAvailable", ticketService.existAnySiteAvailableByParkingId(parkingId));
         return "ticket/list";
     }
 
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/detail/{id}")
-    public String verDetalleTicket(@PathVariable Long id, Model model,
-            @ModelAttribute("currentUser") User currentUser) {
+    public String verDetalleTicket(@PathVariable Long id,
+            Model model,
+            @ModelAttribute("currentUser") UserDTO currentUser) {
+
         try {
-            Ticket ticket = ticketService.findById(id);
+            TicketDTO ticket = ticketService.findById(id);
 
             if (ticket == null) {
                 model.addAttribute("error", "Ticket no encontrado");
                 return "redirect:/tickets/listarParkings";
             }
 
-            // Validar que el usuario actual pertenezca a la organización dueña del parking
-            if (currentUser != null && ticket.getParking() != null && ticket.getParking().getOrganization() != null) {
-                Long orgId = ticket.getParking().getOrganization().getId();
-                if (!currentUser.belongsToOrganization(orgId)) {
-                    model.addAttribute("error", "No autorizado para ver este ticket");
-                    return "redirect:/dashboard";
+            // Site
+            if (ticket.getSite() != null && ticket.getSite().getLevel() != null) {
+                ParkingDTO parking = ticket.getSite().getLevel().getParking();
+                if (parking != null) {
+                    model.addAttribute("parking_id", parking.getId());
+                    model.addAttribute("parking_name", parking.getName());
+                    model.addAttribute("parking_address", parking.getAddress());
+                    String orgName = parking.getOrganization() != null
+                            ? parking.getOrganization().getName()
+                            : "";
+                    model.addAttribute("parking_organization", orgName);
                 }
             }
 
-            // Parking
-            if (ticket.getParking() != null) {
-                model.addAttribute("parking_id", ticket.getParking().getId());
-                model.addAttribute("parking_name", ticket.getParking().getName());
-                model.addAttribute("parking_address", ticket.getParking().getAddress());
-                String orgName = ticket.getParking().getOrganization() != null
-                        ? ticket.getParking().getOrganization().getName()
-                        : "";
-                model.addAttribute("parking_organization", orgName);
-            }
-
             // Ticket base (siempre)
-            model.addAttribute("id", ticket.getId());
+            model.addAttribute("ticket_id", ticket.getId());
             model.addAttribute("vehicle_entry_time", ticket.getEntryTime());
+            model.addAttribute("paid", ticket.isPaid());
+            model.addAttribute("siteId", ticket.getSite().getId());
+            model.addAttribute("levelId", ticket.getSite().getLevel().getId());
 
             // Calculos relacionados con tiempos y totales
             BigDecimal totalPartial = BigDecimal.ZERO;
             BigDecimal computedTotal = BigDecimal.ZERO;
             if (ticket.getExitTime() != null) {
                 model.addAttribute("vehicle_exit_time", ticket.getExitTime());
-                totalPartial = ticketService.calculateTotalPartial(ticket);
+                totalPartial = ticketService.calculateTotalPartial(id);
                 model.addAttribute("total_partial", totalPartial);
-                computedTotal = ticketService.calculateTotalAmount(ticket);
+                computedTotal = ticketService.calculateTotalAmount(id);
+                ticketService.setTotalAmount(id);
             }
 
             // Descuento (si aplica)
             BigDecimal discount = BigDecimal.ZERO;
-            if (ticket.getVehicle() != null && ticket.getVehicle().getOwner() != null) {
-                discount = ticketService.calculateDiscount(ticket.getVehicle().getOwner(), totalPartial);
+            if (ticket.getVehicle() != null) {
+                discount = ticketService.calculateDiscountSafe(ticket.getId(), totalPartial);
             }
             model.addAttribute("discount", discount);
 
@@ -146,13 +169,12 @@ public class TicketController {
                         ? ticket.getVehicle().getCategory().getName()
                         : "";
                 model.addAttribute("vehicle_category", category);
-                String ownerName = "No especificad@";
-                if (ticket.getVehicle().getOwner() != null && ticket.getVehicle().getOwner().getUsername() != null) {
-                    ownerName = ticket.getVehicle().getOwner().getUsername();
-                }
+
+                // IMPORTANTE: Obtener el nombre del propietario de forma segura
+                // sin acceder directamente a la entidad User que podría estar en sesión
+                String ownerName = ticketService.getVehicleOwnerNameSafe(ticket.getVehicle().getId());
                 model.addAttribute("vehicle_owner", ownerName);
             }
-
             return "ticket/detail";
         } catch (Exception e) {
             model.addAttribute("error", "Ticket no encontrado");
@@ -164,9 +186,20 @@ public class TicketController {
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/nuevo/{parkingId}")
     public String mostrarFormularioNuevo(@PathVariable("parkingId") Long parkingId, Model model,
-            @ModelAttribute("currentUser") User currentUser) {
+            @ModelAttribute("currentUser") UserDTO currentUser) {
+
+        List<LevelDTO> levels = levelService.findByParkingId(parkingId);
+
+        // Forzar carga de sitios para cada nivel
+        for (LevelDTO level : levels) {
+            // Esto inicializa la colección lazy de sitios
+            level.getSites().size();
+        }
+
         model.addAttribute("parking", parkingService.findById(parkingId));
-        model.addAttribute("categories", vehicleCategoryService.getAll());
+        model.addAttribute("categories", vehicleCategoryService.getAllActive());
+        model.addAttribute("levels", levels);
+
         return "ticket/form";
     }
 
@@ -174,78 +207,189 @@ public class TicketController {
     @PostMapping("/crear")
     public String crearTicket(
             @RequestParam("parkingId") Long parkingId,
+            @RequestParam("siteId") Long siteId,
             @RequestParam("licensePlate") String licensePlate,
             @RequestParam("color") String color,
             @RequestParam("categoryId") Long categoryId,
             @RequestParam("entryTime") String entryTime,
-            @ModelAttribute("currentUser") User currentUser,
+            @ModelAttribute("currentUser") UserDTO currentUser,
             Model model) {
         try {
-            // Validar parking y pertenencia a organización
-            var parking = parkingService.findByIdAndValidateOrganization(parkingId, currentUser);
-
-            // Buscar o crear vehículo
-            Vehicle vehicle = vehicleService.getVehicleByPlate(licensePlate);
-            if (vehicle == null) {
-                vehicle = vehicleService.createVehicle(licensePlate, color, categoryId, null);
-            }
-
-            // Crear ticket
-            Ticket ticket = Ticket.builder()
-                    .parking(parking)
-                    .vehicle(vehicle)
-                    .entryTime(LocalDateTime.parse(entryTime))
+            VehicleDTO vehicle = VehicleDTO.builder()
+                    .licensePlate(licensePlate)
+                    .color(color)
+                    .category(vehicleCategoryService.findById(categoryId))
                     .build();
 
-            ticketService.save(ticket);
+            TicketDTO ticket = TicketDTO.builder()
+                    .entryTime(LocalDateTime.parse(entryTime))
+                    .paid(false)
+                    .site(siteService.findById(siteId))
+                    .vehicle(vehicle)
+                    .build();
 
+            Long res = ticketService.create(ticket);
+            ticket.setId(res);
+            if (res == 0) {
+                model.addAttribute("error",
+                        "El vehiculo con la placa ingresada no coincide con las demás caracteristicas registradas en el sistema");
+
+                List<LevelDTO> levels = levelService.findByParkingId(parkingId);
+
+                // Forzar carga de sitios para cada nivel
+                for (LevelDTO level : levels) {
+                    // Esto inicializa la colección lazy de sitios
+                    level.getSites().size();
+                }
+                model.addAttribute("parking", parkingService.findById(parkingId));
+                model.addAttribute("categories", vehicleCategoryService.getAll());
+
+                model.addAttribute("levels", levels);
+                return "ticket/form";
+            }
             return "redirect:/tickets/detail/" + ticket.getId();
 
         } catch (IllegalArgumentException e) {
             // Error de validación de organización
             model.addAttribute("error", "No autorizado para crear tickets en este parqueadero");
-            model.addAttribute("parkings", parkingService.findByUserOrganization(currentUser));
+            model.addAttribute("parking", parkingService.findById(parkingId));
             model.addAttribute("categories", vehicleCategoryService.getAll());
+            List<LevelDTO> levels = levelService.findByParkingId(parkingId);
+            for (LevelDTO level : levels) {
+                // Esto inicializa la colección lazy de sitios
+                level.getSites().size();
+            }
+            model.addAttribute("levels", levels);
             return "ticket/form";
         } catch (Exception e) {
             model.addAttribute("error", "Error al crear el ticket: " + e.getMessage());
-            model.addAttribute("parkings", parkingService.findByUserOrganization(currentUser));
+            model.addAttribute("parking", parkingService.findById(parkingId));
             model.addAttribute("categories", vehicleCategoryService.getAll());
+            List<LevelDTO> levels = levelService.findByParkingId(parkingId);
+            for (LevelDTO level : levels) {
+                // Esto inicializa la colección lazy de sitios
+                level.getSites().size();
+            }
+            model.addAttribute("levels", levels);
             return "ticket/form";
         }
     }
 
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
-    @GetMapping("/editar/{id}")
-    public String mostrarFormularioEditar(@PathVariable("id") Long id, Model model,
-            @ModelAttribute("currentUser") User currentUser) {
-        
-        Ticket ticket = ticketService.findById(id);
-        if (ticket == null) {
-            model.addAttribute("error", "Ticket no encontrado");
+    @PostMapping("/pagar/{id}")
+    public String postMethodName(@PathVariable Long id, Model model,
+            @ModelAttribute("currentUser") UserDTO currentUser) {
+        try {
+            ticketService.pay(id);
+            return "redirect:/tickets/detail/" + id;
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al pagar");
             return "redirect:/tickets/listarParkings";
         }
-        model.addAttribute("ticket", ticket);
-        model.addAttribute("categories", vehicleCategoryService.getAll());
-        return "ticket/form";
     }
 
-    @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
-    @PutMapping("/actualizar/{id}")
-    public String actualizarTicket(@PathVariable Long id, Model model, @ModelAttribute("currentUser") User currentUser) {
-        try {
-        Ticket ticket = ticketService.findById(id);
+    /*
+     * @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
+     * 
+     * @GetMapping("/editar/{id}")
+     * public String mostrarFormularioEditar(
+     * 
+     * @PathVariable("id") Long id,
+     * Model model,
+     * 
+     * @ModelAttribute("currentUser") User currentUser) {
+     * 
+     * try {
+     * log.info("Current User ID: {}", currentUser.getId());
+     * log.info("Current User Class: {}", currentUser.getClass().getName());
+     * Ticket ticket = ticketService.findById(id);
+     * if (ticket == null) {
+     * model.addAttribute("error", "Ticket no encontrado");
+     * return "redirect:/tickets/listarParkings";
+     * }
+     * 
+     * // Validar organización
+     * parkingService.findByIdAndValidateOrganization(
+     * ticket.getParking().getId(),
+     * currentUser);
+     * 
+     * model.addAttribute("ticket", ticket);
+     * model.addAttribute("categories", vehicleCategoryService.getAll());
+     * return "ticket/form";
+     * } catch (IllegalArgumentException e) {
+     * model.addAttribute("error", "No autorizado");
+     * return "redirect:/tickets/listarParkings";
+     * }
+     * }
+     */
 
-        if (ticket == null){
-            return "ticket/form";
-        }
-
-        return "redirect:/tickets/detail/" + id;
-        
-        } catch (Exception e){
-            model.addAttribute("error", "Error al actualizar el tiquete");
-            return "ticket/form";
-        }
-    }
+    /*
+     * @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
+     * 
+     * @PostMapping("/actualizar/{id}")
+     * public String actualizarTicket(
+     * 
+     * @PathVariable Long id,
+     * 
+     * @RequestParam("color") String color,
+     * 
+     * @RequestParam("licensePlate") String licensePlate,
+     * 
+     * @RequestParam("categoryId") Long categoryId,
+     * 
+     * @RequestParam(value = "paid", defaultValue = "false") boolean paid,
+     * Model model,
+     * 
+     * @ModelAttribute("currentUser") User currentUser) {
+     * 
+     * try {
+     * 
+     * Ticket ticket = ticketService.findById(id);
+     * 
+     * if (ticket == null) {
+     * model.addAttribute("error", "No se encontró el tiquete");
+     * return "redirect:/tickets/listarParkings";
+     * }
+     * 
+     * log.info("ANTES: ");
+     * Vehicle vehicle = vehicleService.findByLicensePlate(licensePlate);
+     * log.info("DESPUES: ");
+     * 
+     * boolean needsNewVehicle = false;
+     * 
+     * if (vehicle == null) {
+     * needsNewVehicle = true;
+     * } else {
+     * // Solo verificar si el vehículo existe
+     * if (!color.equalsIgnoreCase(vehicle.getColor()) ||
+     * !categoryId.equals(vehicle.getCategory().getId())) {
+     * needsNewVehicle = true;
+     * }
+     * }
+     * 
+     * if (needsNewVehicle) {
+     * // Crear nuevo vehículo
+     * vehicle = vehicleService.createVehicle(licensePlate, color, categoryId,
+     * null);
+     * log.info("Nuevo vehículo creado: {}", vehicle.getLicensePlate());
+     * }
+     * 
+     * ticket.setVehicle(vehicle);
+     * ticket.setPaid(paid);
+     * 
+     * ticketService.save(ticket);
+     * 
+     * return "redirect:/tickets/detail/" + id;
+     * 
+     * } catch (IllegalArgumentException e) {
+     * model.addAttribute("error", "No autorizado para actualizar este ticket");
+     * return "redirect:/tickets/detail/" + id;
+     * } catch (Exception e) {
+     * model.addAttribute("error", e);
+     * log.info("ERROR: ", e);
+     * return "redirect:/tickets/editar/" + id;
+     * }
+     * }
+     */
 
 }

@@ -16,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="user_subscriptions")
-public class UserSubscription {
+public class Subscription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,10 +33,10 @@ public class UserSubscription {
     private LocalDateTime activationDate;
 
     @Column(nullable = false)
-    private int duracionMeses;
+    private int monthsDuration;
 
     @Column(precision = 10, scale = 2, nullable = false) // 10 dígitos en total, 2 decimales
-    private BigDecimal precio;
+    private BigDecimal price;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -45,8 +45,15 @@ public class UserSubscription {
     // Método para saber si expiró
     @Transient 
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(activationDate.plusMonths(duracionMeses));
+        return LocalDateTime.now().isAfter(activationDate.plusMonths(monthsDuration));
     }
+
+    @Transient 
+    public void upgradeStatus() {
+        boolean expired = isExpired();
+        if (expired) this.status = SubscriptionStatus.EXPIRED;
+    }
+
 }
 
 

@@ -14,5 +14,6 @@ import lombok.NoArgsConstructor;
 public class VehicleCategoryDTO {
     private Long id;
     private String name; // Moto, Carro, Camion
-    private BigDecimal rate_per_hour; // Tarifa por hora
+    private BigDecimal ratePerHour; // Tarifa por hora
+    private boolean active;
 }
