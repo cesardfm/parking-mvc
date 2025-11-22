@@ -37,7 +37,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="layout(
                     </a>
                     
                     <!-- Parqueaderos -->
-                    <a href="/parking/listar" 
+                    <a sec:authorize="hasAnyRole('OWNER', 'ADMIN', 'USER')" href="/parking/listar" 
                        th:classappend="${activeMenu == 'parkings'} ? 'bg-primary-50 text-primary-700 border-primary-500' : 'text-gray-700 hover:bg-gray-50 border-transparent'"
                        class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all border-l-4 group">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,8 +56,8 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="layout(
                         <span class="font-medium">Niveles</span>
                     </a>
                     
-                    <!-- Espacios -->
-                    <a sec:authorize="hasAnyRole('OWNER')" href="/users/list" 
+                    <!-- Usuarios -->
+                    <a sec:authorize="hasAnyRole('OWNER', 'ADMIN')" href="/users/list" 
                        th:classappend="${activeMenu == 'users'} ? 'bg-primary-50 text-primary-700 border-primary-500' : 'text-gray-700 hover:bg-gray-50 border-transparent'"
                        class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all border-l-4 group">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,7 +67,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="layout(
                     </a>
 
                     <!-- Tiquetes -->
-                    <a sec:authorize="hasAnyRole('OWNER', 'ADMIN')" href="/tickets/listarParkings" 
+                    <a sec:authorize="hasAnyRole('OWNER', 'ADMIN', 'USER')" href="/tickets/listarParkings" 
                        th:classappend="${activeMenu == 'tickets'} ? 'bg-primary-50 text-primary-700 border-primary-500' : 'text-gray-700 hover:bg-gray-50 border-transparent'"
                        class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all border-l-4 group">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

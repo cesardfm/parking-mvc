@@ -5,18 +5,14 @@ import com.g3.parking.model.User;
 import com.g3.parking.model.Level;
 import com.g3.parking.repository.ParkingRepository;
 import com.g3.parking.service.ParkingService;
-import com.g3.parking.service.UserService;
 import com.g3.parking.repository.LevelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/parking")
@@ -75,7 +71,7 @@ public class ParkingController extends BaseController{
     }
     
     // Listar todos los parkings
-    @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN','USER')")
     @GetMapping("/listar")
     public String listarParkings(Model model, @ModelAttribute("currentUser") User currentUser) {
         model.addAttribute("parkings", parkingService.findByUserOrganization(currentUser));
@@ -83,7 +79,7 @@ public class ParkingController extends BaseController{
     }
 
     // Ver detalles de un parking específico
-    @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN','USER')")
     @GetMapping("/{id}")
     public String verDetalleParking(@PathVariable Long id, Model model, 
             @ModelAttribute("currentUser") User currentUser) {

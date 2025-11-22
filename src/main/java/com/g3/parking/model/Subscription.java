@@ -47,6 +47,13 @@ public class Subscription {
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(activationDate.plusMonths(monthsDuration));
     }
+
+    @Transient 
+    public void upgradeStatus() {
+        boolean expired = isExpired();
+        if (expired) this.status = SubscriptionStatus.EXPIRED;
+    }
+
 }
 
 

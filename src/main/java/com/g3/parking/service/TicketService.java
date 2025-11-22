@@ -140,7 +140,7 @@ public class TicketService extends BaseService {
         return ticketRepository.save(ticket);
     }
 
-    public Ticket setPaid(Long id) {
+    public Ticket pay(Long id) {
         Ticket ticket = ticketRepository.getReferenceById(id);
         if (ticket.getExitTime() == null) {
             ticket.setPaid(true);

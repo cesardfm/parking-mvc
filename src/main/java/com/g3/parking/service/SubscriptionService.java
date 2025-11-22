@@ -22,11 +22,7 @@ public class SubscriptionService extends BaseService {
     @Autowired
     private SubscriptionRepository subscriptionRepo;
 
-    public Subscription getActiveSubscription(Long userId) {
-        Subscription subscription = subscriptionRepo
-                .findByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE)
-                .orElse(null);
-
+    public Subscription upgradeStatus(Subscription subscription) {
         if (subscription != null && subscription.isExpired()) {
             // Actualizar automáticamente si expiró
             subscription.setStatus(SubscriptionStatus.EXPIRED);
@@ -36,10 +32,30 @@ public class SubscriptionService extends BaseService {
         return subscription;
     }
 
+    public Subscription getActiveSubscription(Long userId) {
+        Subscription subscription = subscriptionRepo
+                .findByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE)
+                .orElse(null);
+
+        subscription = upgradeStatus(subscription);
+        return subscription.getStatus() == SubscriptionStatus.ACTIVE ? subscription : null;
+    }
+
     public List<SubscriptionDTO> findAll() {
         List<Subscription> subscriptions = subscriptionRepo.findAll();
         return subscriptions.stream()
                 .map(subscription -> convert(subscription, SubscriptionDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<SubscriptionDTO> findAllOfAnyUser(Long userId) {
+        List<Subscription> subscriptions = subscriptionRepo.findByUser_id(userId);
+        return subscriptions.stream()
+                .map(
+                        subscription -> {
+                            subscription = upgradeStatus(subscription);
+                            return convert(subscription, SubscriptionDTO.class);
+                        })
                 .collect(Collectors.toList());
     }
 
@@ -82,5 +98,14 @@ public class SubscriptionService extends BaseService {
         return Arrays.stream(SubscriptionStatus.values())
                 .map(status -> status.name())
                 .collect(Collectors.toList());
+    }
+
+    public Subscription cancel(Long id) {
+        Subscription subscription = subscriptionRepo.getReferenceById(id);
+        if (subscription != null) {
+            subscription.setStatus(SubscriptionStatus.CANCELLED);
+            subscriptionRepo.save(subscription);
+        }
+        return subscription;
     }
 }

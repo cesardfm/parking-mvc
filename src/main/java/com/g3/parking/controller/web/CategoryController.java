@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.g3.parking.model.User;
 import com.g3.parking.model.VehicleCategory;
 import com.g3.parking.service.VehicleCategoryService;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 @RequestMapping("/categories")

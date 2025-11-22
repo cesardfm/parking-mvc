@@ -3,14 +3,6 @@ package com.g3.parking.datatransfer;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.g3.parking.model.Parking;
-import com.g3.parking.model.Ticket;
-import com.g3.parking.model.Vehicle;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

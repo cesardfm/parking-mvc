@@ -1,9 +1,6 @@
 package com.g3.parking.datatransfer;
 
-import java.util.HashSet;
 import java.util.Set;
-
-import com.g3.parking.model.Organization;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

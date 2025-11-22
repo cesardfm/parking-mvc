@@ -183,7 +183,7 @@ public class ParkingApplication {
 			// ==================== CREAR PLANES ====================
 			Plan planBasic = new Plan();
 			planBasic.setName("Básico");
-			planBasic.setDescription("Plan básico con tarifas estándar");
+			planBasic.setDescription("Plan básico con descuentos en tarifas económicas estándar");
 			planBasic.setPrice(new BigDecimal(50000));
 			planBasic.setDiscountPercent(new BigDecimal(0.10));
 			planRepo.save(planBasic);
@@ -211,6 +211,15 @@ public class ParkingApplication {
 			subscription1.setPrice(planBasic.getPrice().multiply(new BigDecimal(subscription1.getMonthsDuration())));
 			subscription1.setStatus(com.g3.parking.model.SubscriptionStatus.ACTIVE);
 			userSubscriptionRepo.save(subscription1);
+
+			Subscription subscription2 = new Subscription();
+			subscription2.setUser(user1);
+			subscription2.setPlan(planPremium);
+			subscription2.setActivationDate(LocalDateTime.now().minusDays(32));
+			subscription2.setMonthsDuration(1);
+			subscription2.setPrice(planBasic.getPrice().multiply(new BigDecimal(subscription2.getMonthsDuration())));
+			subscription2.setStatus(com.g3.parking.model.SubscriptionStatus.EXPIRED);
+			userSubscriptionRepo.save(subscription2);
 
 
 			// ==================== CREAR CATEGORIAS ====================

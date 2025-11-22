@@ -45,7 +45,7 @@ public class TicketController extends BaseController {
     private LevelRepository levelRepository;
 
     // Listar todos los parkings
-    @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN','USER')")
     @GetMapping("/listarParkings")
     public String listarParkings(Model model, @ModelAttribute("currentUser") User currentUser) {
         model.addAttribute("parkings", parkingService.findByUserOrganization(currentUser));
@@ -133,12 +133,8 @@ public class TicketController extends BaseController {
             }
 
             // Descuento (si aplica)
-            // IMPORTANTE: Solo acceder al owner si es estrictamente necesario
-            // y usar un contexto seguro para evitar conflictos de identidad
             BigDecimal discount = BigDecimal.ZERO;
             if (ticket.getVehicle() != null) {
-                // No acceder directamente a ticket.getVehicle().getOwner()
-                // para evitar lazy loading que podría causar conflictos con el User actual
                 discount = ticketService.calculateDiscountSafe(ticket.getId(), totalPartial);
             }
             model.addAttribute("discount", discount);
@@ -161,7 +157,6 @@ public class TicketController extends BaseController {
                 String ownerName = ticketService.getVehicleOwnerNameSafe(ticket.getVehicle().getId());
                 model.addAttribute("vehicle_owner", ownerName);
             }
-            log.info("Current User ID al final: {}", currentUser.getId());
             return "ticket/detail";
         } catch (Exception e) {
             model.addAttribute("error", "Ticket no encontrado");
@@ -237,7 +232,7 @@ public class TicketController extends BaseController {
     @PostMapping("/pagar/{id}")
     public String postMethodName(@PathVariable Long id, Model model, @ModelAttribute("currentUser") User currentUser) {
         try {
-            ticketService.setPaid(id);
+            ticketService.pay(id);
             return "redirect:/tickets/detail/" + id;
         } catch (Exception e) {
             model.addAttribute("error", "Error al pagar");
