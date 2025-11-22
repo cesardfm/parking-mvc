@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.g3.parking.model.User;
-import com.g3.parking.model.VehicleCategory;
+import com.g3.parking.datatransfer.UserDTO;
+import com.g3.parking.datatransfer.VehicleCategoryDTO;
 import com.g3.parking.service.VehicleCategoryService;
 
 @Controller
@@ -26,7 +26,7 @@ public class CategoryController extends BaseController {
 
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/listar")
-    public String mostrarCategorias(Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String mostrarCategorias(Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         model.addAttribute("categories", categoryService.getAll());
         return "category/list";
     }
@@ -34,14 +34,14 @@ public class CategoryController extends BaseController {
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/detail/{id}")
     public String mostrarDetalle(@PathVariable("id") Long id, Model model,
-            @ModelAttribute("currentUser") User currentUser) {
+            @ModelAttribute("currentUser") UserDTO currentUser) {
         model.addAttribute("category", categoryService.findById(id));
         return "category/detail";
     }
 
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/nuevo")
-    public String nuevo(Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String nuevo(Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         return "category/form";
     }
 
@@ -49,8 +49,8 @@ public class CategoryController extends BaseController {
     @PostMapping("/crear")
     public String crear(@RequestParam("name") String name,
             @RequestParam("ratePerHour") BigDecimal ratePerHour,
-            Model model, @ModelAttribute("currentUser") User currentUser) {
-        VehicleCategory categoria = categoryService.create(name, ratePerHour);
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
+        VehicleCategoryDTO categoria = categoryService.create(name, ratePerHour);
         if (categoria == null) {
             model.addAttribute("error", "La categoria ya existe");
             return "category/form";
@@ -60,7 +60,7 @@ public class CategoryController extends BaseController {
 
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/editar/{id}")
-    public String editar(@PathVariable("id") Long id, Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String editar(@PathVariable("id") Long id, Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         model.addAttribute("category", categoryService.findById(id));
         return "category/form";
     }
@@ -70,8 +70,8 @@ public class CategoryController extends BaseController {
     public String actualizar(@PathVariable("id") Long id,
             @RequestParam("name") String name,
             @RequestParam("ratePerHour") BigDecimal ratePerHour,
-            Model model, @ModelAttribute("currentUser") User currentUser) {
-        VehicleCategory categoria = categoryService.upgrade(id, name, ratePerHour);
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
+        VehicleCategoryDTO categoria = categoryService.upgrade(id, name, ratePerHour);
         if (categoria == null) {
             model.addAttribute("category", categoryService.findById(id));
             model.addAttribute("error", "No se pudo actualizar la categoria");
@@ -83,7 +83,7 @@ public class CategoryController extends BaseController {
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @PostMapping("/changeStatus/{id}")
     public String changeStatus(@PathVariable("id") Long id,
-            Model model, @ModelAttribute("currentUser") User currentUser) {
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         
         categoryService.changeStatus(id);
         return "redirect:/categories/listar";

@@ -1,7 +1,5 @@
 package com.g3.parking.service;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,19 +24,10 @@ public class SubscriptionService extends BaseService {
         if (subscription != null && subscription.isExpired()) {
             // Actualizar automáticamente si expiró
             subscription.setStatus(SubscriptionStatus.EXPIRED);
-            subscriptionRepo.save(subscription);
+            subscriptionRepo.save(convert(subscription, Subscription.class));
         }
 
         return subscription;
-    }
-
-    public Subscription getActiveSubscription(Long userId) {
-        Subscription subscription = subscriptionRepo
-                .findByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE)
-                .orElse(null);
-
-        subscription = upgradeStatus(subscription);
-        return subscription.getStatus() == SubscriptionStatus.ACTIVE ? subscription : null;
     }
 
     public List<SubscriptionDTO> findAll() {
@@ -100,12 +89,12 @@ public class SubscriptionService extends BaseService {
                 .collect(Collectors.toList());
     }
 
-    public Subscription cancel(Long id) {
+    public SubscriptionDTO cancel(Long id) {
         Subscription subscription = subscriptionRepo.getReferenceById(id);
         if (subscription != null) {
             subscription.setStatus(SubscriptionStatus.CANCELLED);
             subscriptionRepo.save(subscription);
         }
-        return subscription;
+        return convert(subscription, SubscriptionDTO.class);
     }
 }

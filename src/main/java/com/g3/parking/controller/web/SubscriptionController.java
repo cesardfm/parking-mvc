@@ -14,19 +14,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.g3.parking.datatransfer.SubscriptionDTO;
+import com.g3.parking.datatransfer.UserDTO;
 import com.g3.parking.model.SubscriptionStatus;
-import com.g3.parking.model.User;
 import com.g3.parking.service.PlanService;
 import com.g3.parking.service.SubscriptionService;
 import com.g3.parking.service.UserService;
 
-import jakarta.websocket.server.PathParam;
-import org.springframework.web.bind.annotation.RequestBody;
-
-
 @Controller
 @RequestMapping("/subscriptions")
-public class SubscriptionController {
+public class SubscriptionController extends BaseController {
 
     @Autowired
     private SubscriptionService subscriptionService;
@@ -38,7 +34,7 @@ public class SubscriptionController {
     private UserService userService;
 
     @GetMapping("/listar/{userId}")
-    public String listar(@PathVariable Long userId, Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String listar(@PathVariable Long userId, Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         model.addAttribute("subscriptions", subscriptionService.findAllOfAnyUser(userId));
         model.addAttribute("userId", userId);
         return "subscription/list";
@@ -46,7 +42,7 @@ public class SubscriptionController {
 
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable Long id,
-            Model model, @ModelAttribute("currentUser") User currentUser) {
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
 
         model.addAttribute("subscription", subscriptionService.findById(id));
         return "subscription/detail";
@@ -54,21 +50,24 @@ public class SubscriptionController {
 
     @PostMapping("/cancel/{id}")
     public String postMethodName(@PathVariable Long id,
-            Model model, @ModelAttribute("currentUser") User currentUser) {
-        
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
+
         subscriptionService.cancel(id);
-        return "redirect:/subscriptions/detail/"+id;
+        return "redirect:/subscriptions/detail/" + id;
     }
-    
+
     @GetMapping("/selectPlan/{userId}")
-    public String selectPlan(@PathVariable Long userId, Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String selectPlan(@PathVariable Long userId, Model model,
+            @ModelAttribute("currentUser") UserDTO currentUser) {
         model.addAttribute("plans", planService.findAllActive());
         model.addAttribute("userId", userId);
         return "subscription/buy";
     }
 
     @GetMapping("/nuevo/{userId}/{planId}")
-    public String nuevo(@PathVariable("userId") Long userId, @PathVariable("planId") Long planId, Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String nuevo(@PathVariable("userId") Long userId,
+            @PathVariable("planId") Long planId, Model model,
+            @ModelAttribute("currentUser") UserDTO currentUser) {
         model.addAttribute("plan", planService.findById(planId));
         model.addAttribute("userId", userId);
         return "subscription/form";
@@ -79,7 +78,7 @@ public class SubscriptionController {
             @RequestParam("planId") Long planId,
             @RequestParam("monthsDuration") int monthsDuration,
             @RequestParam("price") BigDecimal price,
-            Model model, @ModelAttribute("currentUser") User currentUser) {
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
 
         SubscriptionDTO subscription = SubscriptionDTO.builder()
                 .user(userService.findById(userId))
@@ -100,7 +99,7 @@ public class SubscriptionController {
 
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable("id") Long id,
-            Model model, @ModelAttribute("currentUser") User currentUser) {
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
 
         model.addAttribute("subscription", subscriptionService.findById(id));
         model.addAttribute("plans", planService.findAllActive());
@@ -116,7 +115,7 @@ public class SubscriptionController {
             @RequestParam("monthsDuration") int monthsDuration,
             @RequestParam("price") BigDecimal price,
             @RequestParam("status") String status,
-            Model model, @ModelAttribute("currentUser") User currentUser) {
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
 
         SubscriptionDTO subscription = SubscriptionDTO.builder()
                 .user(userService.findById(userId))
@@ -125,7 +124,7 @@ public class SubscriptionController {
                 .monthsDuration(monthsDuration)
                 .price(price)
                 .build();
-            subscription.setSubscriptionStatusFromString(status);
+        subscription.setSubscriptionStatusFromString(status);
         boolean res = subscriptionService.update(subscription);
 
         if (res == false) {

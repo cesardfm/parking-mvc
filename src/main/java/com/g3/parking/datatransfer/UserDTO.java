@@ -18,4 +18,9 @@ public class UserDTO {
     private OrganizationDTO organization;
     private Set<RoleDTO> roles;
     private Boolean active;
+
+    public boolean hasRole(String roleName) {
+        return roles.stream()
+            .anyMatch(role -> role.getName().equals(roleName));
+    }
 }

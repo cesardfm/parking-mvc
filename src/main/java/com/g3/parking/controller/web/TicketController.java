@@ -1,10 +1,11 @@
 package com.g3.parking.controller.web;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.hibernate.validator.internal.util.logging.Log_.logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -12,12 +13,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.g3.parking.model.Level;
-import com.g3.parking.model.Parking;
-import com.g3.parking.model.Ticket;
-import com.g3.parking.model.User;
-import com.g3.parking.repository.LevelRepository;
+import com.g3.parking.datatransfer.LevelDTO;
+import com.g3.parking.datatransfer.ParkingDTO;
+import com.g3.parking.datatransfer.RoleDTO;
+import com.g3.parking.datatransfer.TicketDTO;
+import com.g3.parking.datatransfer.UserDTO;
+import com.g3.parking.datatransfer.VehicleDTO;
+import com.g3.parking.service.LevelService;
 import com.g3.parking.service.ParkingService;
+import com.g3.parking.service.RoleService;
+import com.g3.parking.service.SiteService;
 import com.g3.parking.service.TicketService;
 import com.g3.parking.service.VehicleCategoryService;
 
@@ -30,8 +35,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RequestMapping("/tickets")
 public class TicketController extends BaseController {
 
-    private static final Logger log = LoggerFactory.getLogger(TicketController.class);
-
     @Autowired
     private TicketService ticketService;
 
@@ -42,12 +45,18 @@ public class TicketController extends BaseController {
     private VehicleCategoryService vehicleCategoryService;
 
     @Autowired
-    private LevelRepository levelRepository;
+    private LevelService levelService;
+
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
+    private SiteService siteService;
 
     // Listar todos los parkings
     @PreAuthorize("hasAnyRole('OWNER','ADMIN','USER')")
     @GetMapping("/listarParkings")
-    public String listarParkings(Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String listarParkings(Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         model.addAttribute("parkings", parkingService.findByUserOrganization(currentUser));
         return "ticket/listParkings";
     }
@@ -56,18 +65,29 @@ public class TicketController extends BaseController {
     @GetMapping("/{parkingId}")
     public String listarTickets(@PathVariable Long parkingId,
             Model model,
-            @ModelAttribute("currentUser") User currentUser) {
+            @ModelAttribute("currentUser") UserDTO currentUser) {
 
-        Parking parking = parkingService.findById(parkingId);
+        ParkingDTO parking = parkingService.findById(parkingId);
         if (parking == null) {
             model.addAttribute("error", "Parking no encontrado");
             return "redirect:/tickets/listarParkings";
         }
 
-        List<Ticket> tickets = ticketService.findBySite_Level_Parking_Id(parkingId);
+        List<TicketDTO> tickets = new ArrayList<>();
+
+        System.out.println(currentUser.getRoles());
+        boolean isAdminOrOwner = currentUser.getRoles().stream()
+                .anyMatch(role -> "ROLE_ADMIN".equals(role.getName()) || "ADMIN".equals(role.getName()) || "ROLE_OWNER".equals(role.getName()) || "OWNER".equals(role.getName()));
+
+        
+        if (isAdminOrOwner) {
+            tickets = ticketService.findBySite_Level_Parking_Id(parkingId);
+        } else {
+            tickets = ticketService.findBySite_Level_Parking_IdAndVehicle_Owner_Id(parkingId, currentUser.getId());
+        }
 
         // Forzar carga de relaciones lazy
-        for (Ticket ticket : tickets) {
+        for (TicketDTO ticket : tickets) {
             if (ticket.getVehicle() != null) {
                 // Acceder a las relaciones para forzar carga
                 ticket.getVehicle().getLicensePlate();
@@ -88,12 +108,10 @@ public class TicketController extends BaseController {
     @GetMapping("/detail/{id}")
     public String verDetalleTicket(@PathVariable Long id,
             Model model,
-            @ModelAttribute("currentUser") User currentUser) {
+            @ModelAttribute("currentUser") UserDTO currentUser) {
 
         try {
-            log.info("/detail/{id} - ID: {}", id);
-            log.info("Current User ID al inicio: {}", currentUser.getId());
-            Ticket ticket = ticketService.findById(id);
+            TicketDTO ticket = ticketService.findById(id);
 
             if (ticket == null) {
                 model.addAttribute("error", "Ticket no encontrado");
@@ -102,7 +120,7 @@ public class TicketController extends BaseController {
 
             // Site
             if (ticket.getSite() != null && ticket.getSite().getLevel() != null) {
-                Parking parking = ticket.getSite().getLevel().getParking();
+                ParkingDTO parking = ticket.getSite().getLevel().getParking();
                 if (parking != null) {
                     model.addAttribute("parking_id", parking.getId());
                     model.addAttribute("parking_name", parking.getName());
@@ -168,12 +186,12 @@ public class TicketController extends BaseController {
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/nuevo/{parkingId}")
     public String mostrarFormularioNuevo(@PathVariable("parkingId") Long parkingId, Model model,
-            @ModelAttribute("currentUser") User currentUser) {
+            @ModelAttribute("currentUser") UserDTO currentUser) {
 
-        List<Level> levels = levelRepository.findByParkingId(parkingId);
+        List<LevelDTO> levels = levelService.findByParkingId(parkingId);
 
         // Forzar carga de sitios para cada nivel
-        for (Level level : levels) {
+        for (LevelDTO level : levels) {
             // Esto inicializa la colección lazy de sitios
             level.getSites().size();
         }
@@ -194,22 +212,39 @@ public class TicketController extends BaseController {
             @RequestParam("color") String color,
             @RequestParam("categoryId") Long categoryId,
             @RequestParam("entryTime") String entryTime,
-            @ModelAttribute("currentUser") User currentUser,
+            @ModelAttribute("currentUser") UserDTO currentUser,
             Model model) {
         try {
-            Ticket ticket = ticketService.create(
-                    parkingId,
-                    siteId,
-                    licensePlate,
-                    color,
-                    categoryId,
-                    entryTime,
-                    currentUser);
-            if (ticket == null) {
+            VehicleDTO vehicle = VehicleDTO.builder()
+                    .licensePlate(licensePlate)
+                    .color(color)
+                    .category(vehicleCategoryService.findById(categoryId))
+                    .build();
+
+            TicketDTO ticket = TicketDTO.builder()
+                    .entryTime(LocalDateTime.parse(entryTime))
+                    .paid(false)
+                    .site(siteService.findById(siteId))
+                    .vehicle(vehicle)
+                    .build();
+
+            Long res = ticketService.create(ticket);
+            ticket.setId(res);
+            if (res == 0) {
                 model.addAttribute("error",
                         "El vehiculo con la placa ingresada no coincide con las demás caracteristicas registradas en el sistema");
+
+                List<LevelDTO> levels = levelService.findByParkingId(parkingId);
+
+                // Forzar carga de sitios para cada nivel
+                for (LevelDTO level : levels) {
+                    // Esto inicializa la colección lazy de sitios
+                    level.getSites().size();
+                }
                 model.addAttribute("parking", parkingService.findById(parkingId));
                 model.addAttribute("categories", vehicleCategoryService.getAll());
+
+                model.addAttribute("levels", levels);
                 return "ticket/form";
             }
             return "redirect:/tickets/detail/" + ticket.getId();
@@ -217,20 +252,33 @@ public class TicketController extends BaseController {
         } catch (IllegalArgumentException e) {
             // Error de validación de organización
             model.addAttribute("error", "No autorizado para crear tickets en este parqueadero");
-            model.addAttribute("parkings", parkingService.findByUserOrganization(currentUser));
+            model.addAttribute("parking", parkingService.findById(parkingId));
             model.addAttribute("categories", vehicleCategoryService.getAll());
+            List<LevelDTO> levels = levelService.findByParkingId(parkingId);
+            for (LevelDTO level : levels) {
+                // Esto inicializa la colección lazy de sitios
+                level.getSites().size();
+            }
+            model.addAttribute("levels", levels);
             return "ticket/form";
         } catch (Exception e) {
             model.addAttribute("error", "Error al crear el ticket: " + e.getMessage());
-            model.addAttribute("parkings", parkingService.findByUserOrganization(currentUser));
+            model.addAttribute("parking", parkingService.findById(parkingId));
             model.addAttribute("categories", vehicleCategoryService.getAll());
+            List<LevelDTO> levels = levelService.findByParkingId(parkingId);
+            for (LevelDTO level : levels) {
+                // Esto inicializa la colección lazy de sitios
+                level.getSites().size();
+            }
+            model.addAttribute("levels", levels);
             return "ticket/form";
         }
     }
 
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @PostMapping("/pagar/{id}")
-    public String postMethodName(@PathVariable Long id, Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String postMethodName(@PathVariable Long id, Model model,
+            @ModelAttribute("currentUser") UserDTO currentUser) {
         try {
             ticketService.pay(id);
             return "redirect:/tickets/detail/" + id;

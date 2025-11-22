@@ -14,6 +14,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     Optional<Ticket> findByPaidFalseAndVehicle_LicensePlate(String licensePlate);
     List<Ticket> findBySite_Id(Long siteId);
     List<Ticket> findBySite_Level_Parking_Id(Long parkingId);
+    List<Ticket> findBySite_Level_Parking_IdAndVehicle_Owner_Id(Long parkingId, Long ownerId);
     Optional<Ticket> findById(Long id);
     
     /**

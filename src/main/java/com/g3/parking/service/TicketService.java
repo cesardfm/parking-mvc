@@ -4,18 +4,17 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.g3.parking.controller.web.TicketController;
+import com.g3.parking.datatransfer.SiteDTO;
+import com.g3.parking.datatransfer.TicketDTO;
+import com.g3.parking.datatransfer.VehicleDTO;
 import com.g3.parking.model.Site;
 import com.g3.parking.model.SubscriptionStatus;
 import com.g3.parking.model.Ticket;
-import com.g3.parking.model.User;
-import com.g3.parking.model.Vehicle;
 import com.g3.parking.repository.SiteRepository;
 import com.g3.parking.repository.TicketRepository;
 
@@ -32,32 +31,48 @@ public class TicketService extends BaseService {
     private VehicleService vehicleService;
 
     @Autowired
-    private SiteRepository siteRepository;
+    private SiteService siteService;
 
-    public List<Ticket> findBySite_Id(Long siteId) {
-        return ticketRepository.findBySite_Id(siteId);
+    @Autowired
+    private VehicleCategoryService vehicleCategoryService;
+
+    public List<TicketDTO> findBySite_Id(Long siteId) {
+        List<Ticket> tickets = ticketRepository.findBySite_Id(siteId);
+        return tickets.stream()
+                .map(ticket -> convert(ticket, TicketDTO.class))
+                .collect(Collectors.toList());
     }
 
-    public List<Ticket> findBySite_Level_Parking_Id(Long parkingId) {
-        return ticketRepository.findBySite_Level_Parking_Id(parkingId);
+    public List<TicketDTO> findBySite_Level_Parking_Id(Long parkingId) {
+        List<Ticket> tickets = ticketRepository.findBySite_Level_Parking_Id(parkingId);
+        return tickets.stream()
+                .map(ticket -> convert(ticket, TicketDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<TicketDTO> findBySite_Level_Parking_IdAndVehicle_Owner_Id(Long parkingId, Long ownerId) {
+        List<Ticket> tickets = ticketRepository.findBySite_Level_Parking_IdAndVehicle_Owner_Id(parkingId, ownerId);
+        return tickets.stream()
+                .map(ticket -> convert(ticket, TicketDTO.class))
+                .collect(Collectors.toList());
     }
 
     public boolean existAnySiteAvailableByParkingId(Long parkingId) {
-        List<Site> sitesAvailable = siteRepository.findByStatusAndLevel_Parking_Id("available", parkingId);
+        List<SiteDTO> sitesAvailable = siteService.findByStatusAndLevel_Parking_Id("available", parkingId);
         return !sitesAvailable.isEmpty();
     }
 
-    public Ticket findById(Long id) {
-        // IMPORTANTE: Usar findByIdWithRelations en lugar de findById
+    public TicketDTO findById(Long id) {
+        // IMPORTANTE: Se usa findByIdWithRelations en lugar de findById
         // para evitar que Hibernate intente reacoplar User con IDs conflictivos
         // cuando se cargen las relaciones lazy.
         Ticket ticket = ticketRepository.findByIdWithRelations(id)
                 .orElse(null);
-        return ticket;
+        return convert(ticket, TicketDTO.class);
     }
 
     public BigDecimal calculateTotalPartial(Long id) {
-        Ticket ticket = findById(id);
+        TicketDTO ticket = findById(id);
         if (ticket.getEntryTime() == null || ticket.getExitTime() == null) {
             return BigDecimal.ZERO;
         }
@@ -74,7 +89,7 @@ public class TicketService extends BaseService {
     }
 
     public BigDecimal calculateTotalAmount(Long id) {
-        Ticket ticket = findById(id);
+        TicketDTO ticket = findById(id);
         BigDecimal totalPartial = calculateTotalPartial(id);
         BigDecimal totalAmount = totalPartial;
         // Aplicar descuento si existe
@@ -101,52 +116,46 @@ public class TicketService extends BaseService {
         return discount.setScale(2, RoundingMode.HALF_UP);
     }
 
-    public Ticket setTotalAmount(Long id) {
-        Ticket ticket = findById(id);
+    public TicketDTO setTotalAmount(Long id) {
+        TicketDTO ticket = findById(id);
         BigDecimal totalAmount = calculateTotalAmount(id);
         ticket.setTotalAmount(totalAmount);
-        return ticketRepository.save(ticket);
+        ticketRepository.save(convert(ticket, Ticket.class));
+        return ticket;
     }
 
-    public Ticket create(
-            Long parkingId,
-            Long siteId,
-            String licensePlate,
-            String color,
-            Long categoryId,
-            String entryTime,
-            User currentUser) {
+    public Long create(TicketDTO ticket) {
 
         // Buscar o crear vehículo
-        Vehicle vehicle = vehicleService.findByLicensePlate(licensePlate);
-        if (vehicle == null) {
-            vehicle = vehicleService.createVehicle(licensePlate, color, categoryId, null);
-        } else if (!vehicle.getCategory().getId().equals(categoryId) || !vehicle.getColor().equalsIgnoreCase(color)) {
-            return null;
+        if (ticket == null) {
+            return 0L;
         }
 
-        Site site = siteRepository.getReferenceById(siteId);
-        site.setStatus("disabled");
-        // Crear ticket
-        Ticket ticket = Ticket.builder()
-                .site(site)
-                .vehicle(vehicle)
-                .entryTime(LocalDateTime.parse(entryTime))
-                .paid(false)
-                .build();
+        VehicleDTO vehicle = vehicleService.findByLicensePlate(ticket.getVehicle().getLicensePlate());
 
-        siteRepository.save(site);
-        ticketRepository.save(ticket);
-        return ticketRepository.save(ticket);
+        if (vehicle == null) {
+            Long vehicleId = vehicleService.create(ticket.getVehicle());
+            ticket.getVehicle().setId(vehicleId);
+            if (vehicleId == 0L) {
+                return 0L;
+            }
+        } else if (!vehicle.getCategory().getId().equals(ticket.getVehicle().getCategory().getId())
+                || !vehicle.getColor().equalsIgnoreCase(ticket.getVehicle().getColor())) {
+            return 0L;
+        }
+
+        siteService.changeStatus(ticket.getSite().getId(), "disabled");
+        
+        return ticketRepository.save(convert(ticket, Ticket.class)).getId();
     }
 
-    public Ticket pay(Long id) {
+    public TicketDTO pay(Long id) {
         Ticket ticket = ticketRepository.getReferenceById(id);
         if (ticket.getExitTime() == null) {
             ticket.setPaid(true);
             ticket.setExitTime(LocalDateTime.now());
             ticketRepository.save(ticket);
-            return ticket;
+            return convert(ticket, TicketDTO.class);
         } else {
             return null;
         }
@@ -168,12 +177,12 @@ public class TicketService extends BaseService {
 
         try {
             // Obtener el ticket con sus relaciones (sin User del owner)
-            Ticket ticket = findById(ticketId);
+            TicketDTO ticket = findById(ticketId);
             if (ticket == null || ticket.getVehicle() == null) {
                 return BigDecimal.ZERO;
             }
 
-            Vehicle vehicle = ticket.getVehicle();
+            VehicleDTO vehicle = ticket.getVehicle();
             // NO acceder a vehicle.getOwner() directamente para evitar lazy loading
             // En su lugar, consultar el ID del propietario a través de la BD
             Long ownerId = vehicleService.getVehicleOwnerId(vehicle.getId());

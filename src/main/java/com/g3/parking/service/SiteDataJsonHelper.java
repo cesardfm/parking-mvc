@@ -1,6 +1,5 @@
 package com.g3.parking.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.g3.parking.model.Site;
+import com.g3.parking.datatransfer.SiteDTO;
 
 /**
  * Helper para convertir datos de sitios a JSON para usar en Thymeleaf
@@ -25,11 +24,11 @@ public class SiteDataJsonHelper {
      * Convierte una lista de sitios a JSON string
      * Incluye solo los campos necesarios para el frontend
      */
-    public String toJson(List<Site> sites) {
+    public String toJson(List<SiteDTO> sites) {
         log.info("🔄 Convirtiendo sitios a JSON. Total sitios: {}", sites != null ? sites.size() : 0);
         
         if (sites == null || sites.isEmpty()) {
-            log.warn("⚠️ Lista de sitios vacía o nula");
+            log.warn("Lista de sitios vacía o nula");
             return "[]";
         }
         
@@ -49,12 +48,11 @@ public class SiteDataJsonHelper {
                 .collect(Collectors.toList());
             
             String json = objectMapper.writeValueAsString(siteDtos);
-            log.info("✅ JSON generado exitosamente. Tamaño: {} caracteres", json.length());
-            log.debug("JSON: {}", json.length() > 200 ? json.substring(0, 200) + "..." : json);
+            log.info("JSON generado exitosamente. Tamaño: {} caracteres", json.length());
             
             return json;
         } catch (JsonProcessingException e) {
-            log.error("❌ Error al convertir sitios a JSON", e);
+            log.error("Error al convertir sitios a JSON", e);
             // En caso de error, retornar array vacío
             return "[]";
         }

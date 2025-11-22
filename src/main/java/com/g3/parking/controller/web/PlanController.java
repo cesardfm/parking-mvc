@@ -8,7 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.g3.parking.datatransfer.PlanDTO;
-import com.g3.parking.model.User;
+import com.g3.parking.datatransfer.UserDTO;
 import com.g3.parking.service.PlanService;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,14 +25,14 @@ public class PlanController extends BaseController {
     private PlanService planService;
 
     @GetMapping("/listar")
-    public String listar(Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String listar(Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         model.addAttribute("plans", planService.findAll());
         return "plan/list";
     }
 
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable Long id,
-            Model model, @ModelAttribute("currentUser") User currentUser) {
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
 
         model.addAttribute("plan", planService.findById(id));
         return "plan/detail";
@@ -40,14 +40,14 @@ public class PlanController extends BaseController {
 
     @PostMapping("/changeStatus/{id}")
     public String changeStatus(@PathVariable Long id,
-            Model model, @ModelAttribute("currentUser") User currentUser) {
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
 
         planService.changeStatus(id);
         return "redirect:/plans/listar";
     }
 
     @GetMapping("/nuevo")
-    public String nuevo(Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String nuevo(Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         return "plan/form";
     }
 
@@ -56,7 +56,7 @@ public class PlanController extends BaseController {
             @RequestParam("description") String description,
             @RequestParam("discountPercent") BigDecimal discountPercent,
             @RequestParam("price") BigDecimal price,
-            Model model, @ModelAttribute("currentUser") User currentUser) {
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
 
         PlanDTO plan = PlanDTO.builder()
                 .name(name)
@@ -76,7 +76,7 @@ public class PlanController extends BaseController {
 
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable("id") Long id, 
-            Model model, @ModelAttribute("currentUser") User currentUser) {
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         
         model.addAttribute("plan", planService.findById(id));
         return "plan/form";
@@ -88,7 +88,7 @@ public class PlanController extends BaseController {
             @RequestParam("description") String description,
             @RequestParam("price") BigDecimal price,
             @RequestParam("discountPercent") BigDecimal discountPercent,
-            Model model, @ModelAttribute("currentUser") User currentUser) {
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         
         PlanDTO plan = PlanDTO.builder()
                         .id(id)

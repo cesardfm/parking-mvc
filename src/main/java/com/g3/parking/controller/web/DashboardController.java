@@ -1,6 +1,6 @@
 package com.g3.parking.controller.web;
 
-import com.g3.parking.model.User;
+import com.g3.parking.datatransfer.UserDTO;
 import com.g3.parking.service.ParkingService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class DashboardController extends BaseController{
     @GetMapping("/dashboard")
     public String dashboard(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         // Últimos parqueaderos (máximo 5)
-        User user = userService.findByUsername(userDetails.getUsername());
+        UserDTO user = userService.findByUsername(userDetails.getUsername());
         model.addAttribute("recentParkings", parkingService.findByUserOrganization(user));
         
         return "dashboard";

@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TicketDTO {
     private Long id;
-    private ParkingDTO parking;
+    private SiteDTO site;
     private VehicleDTO vehicle;
     private LocalDateTime entryTime;
     private LocalDateTime exitTime;

@@ -1,8 +1,8 @@
 package com.g3.parking.controller.web;
 
-import com.g3.parking.model.Site;
-import com.g3.parking.repository.SiteRepository;
+import com.g3.parking.datatransfer.SiteDTO;
 import com.g3.parking.request.SiteUpdateRequest;
+import com.g3.parking.service.SiteService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,14 +12,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/sites")
 public class SiteController extends BaseController {
     
     @Autowired
-    private SiteRepository siteRepository;
+    private SiteService siteService;
     
     // Actualizar múltiples sites en batch
     @PostMapping("/batch-update")
@@ -29,11 +28,10 @@ public class SiteController extends BaseController {
         
         try {
             for (SiteUpdateRequest change : changes) {
-                Optional<Site> siteOpt = siteRepository.findById(change.getSiteId());
-                if (siteOpt.isPresent()) {
-                    Site site = siteOpt.get();
+                SiteDTO site = siteService.findById(change.getSiteId());
+                if (site != null ) {
                     site.setStatus(change.getStatus());
-                    siteRepository.save(site);
+                    siteService.create(site);
                 }
             }
             
