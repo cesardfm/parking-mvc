@@ -1,0 +1,22 @@
+FROM eclipse-temurin:22-jdk
+
+# Instalar OpenALPR en Linux
+RUN apt-get update && apt-get install -y \
+    openalpr \
+    openalpr-daemon \
+    libopenalpr-dev \
+    libopencv-dev \
+    && apt-get clean
+
+# PASO 3: Copiar configuraciones desde el código al contenedor
+COPY src/main/resources/openalpr/openalpr.conf /etc/openalpr/openalpr.conf
+COPY src/main/resources/openalpr/runtime_data/ /usr/share/openalpr/runtime_data/
+
+# Copiar tu jar del proyecto
+COPY target/*.jar app.jar
+
+# Variables obligatorias para que OpenALPR funcione
+ENV OPENALPR_CONFIG_FILE="/etc/openalpr/openalpr.conf"
+ENV LD_LIBRARY_PATH="/usr/lib:/usr/local/lib"
+
+CMD ["java", "-jar", "app.jar"]

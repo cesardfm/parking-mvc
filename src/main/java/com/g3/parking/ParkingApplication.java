@@ -27,6 +27,14 @@ public class ParkingApplication {
                           OrganizationRepository orgRepo,
                           PasswordEncoder encoder) {
         return args -> {
+            // Verificar si ya existen datos (para evitar duplicados)
+            if (roleRepo.count() > 0) {
+                System.out.println("==============================================");
+                System.out.println("✅ Base de datos ya contiene datos");
+                System.out.println("==============================================");
+                return;
+            }
+            
             // ==================== CREAR ROLES ====================
             Role ownerRole = new Role();
             ownerRole.setName("ROLE_OWNER");

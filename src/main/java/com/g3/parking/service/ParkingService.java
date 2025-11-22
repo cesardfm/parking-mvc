@@ -68,7 +68,7 @@ public class ParkingService {
     public void deleteIfAuthorized(Long parkingId, User currentUser) {
         Parking parking = findByIdAndValidateOrganization(parkingId, currentUser);
         
-        parkingRepository.deleteById(parkingId);
+        parkingRepository.delete(parking);
     }
     
     // Asignar admin a parking

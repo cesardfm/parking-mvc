@@ -7,12 +7,10 @@ import org.springframework.stereotype.Service;
 import com.g3.parking.model.Organization;
 import com.g3.parking.model.Role;
 import com.g3.parking.model.User;
-import com.g3.parking.repository.OrganizationRepository;
 import com.g3.parking.repository.RoleRepository;
 import com.g3.parking.repository.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -20,14 +18,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private static Integer counter = 0;
-    private final OrganizationRepository organizationRepository;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, OrganizationRepository organizationrRepository) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
-        this.organizationRepository = organizationrRepository;
     }
 
     public User findByUsername(String username) throws UsernameNotFoundException {
