@@ -121,8 +121,8 @@ public class ParkingApplication {
 			// ==================== CREAR PARQUEADEROS ====================
 			Parking parking1 = new Parking();
 			parking1.setName("Parking Central");
-			parking1.setLat(12.0);
-			parking1.setLng(21.0);
+			parking1.setLat(4.1420);
+			parking1.setLng(-73.6266);
 			parking1.setAddress("Calle 123 #45-67");
 			parking1.setOrganization(org1);
 			parking1.setCreatedBy(owner1);
@@ -131,8 +131,8 @@ public class ParkingApplication {
 
 			Parking parking2 = new Parking();
 			parking2.setName("Parking Oriente");
-			parking2.setLat(43.0);
-			parking2.setLng(11.0);
+			parking2.setLat(4.1520);
+			parking2.setLng(-73.6166);
 			parking2.setAddress("Calle 35 #11-22");
 			parking2.setOrganization(org1);
 			parking2.setCreatedBy(owner1);

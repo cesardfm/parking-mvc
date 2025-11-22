@@ -240,7 +240,6 @@ public class TicketController {
             return "ticket/form";
         }
 
-        ticketService.
         return "redirect:/tickets/detail/" + id;
         
         } catch (Exception e){

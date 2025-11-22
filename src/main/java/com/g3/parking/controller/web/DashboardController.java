@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
 public class DashboardController {
@@ -19,6 +21,12 @@ public class DashboardController {
 
     @Autowired
     private ParkingService parkingService;
+
+    @GetMapping("/map")
+    public String getMap() {
+        return "map";   
+    }
+    
     
     
     @GetMapping("/dashboard")

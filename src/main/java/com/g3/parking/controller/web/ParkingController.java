@@ -8,6 +8,7 @@ import com.g3.parking.service.ParkingService;
 import com.g3.parking.service.UserService;
 import com.g3.parking.repository.LevelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,8 +16,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/parking")
@@ -165,4 +169,30 @@ public class ParkingController {
             return "redirect:/parking/" + id;
         }
     }
+
+    // API: Obtener ubicaciones de parqueaderos de la organización del usuario
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
+    @GetMapping("/api/locations")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> getParkingLocations(
+            @ModelAttribute("currentUser") User currentUser) {
+        
+        List<Parking> parkings = parkingService.findByUserOrganization(currentUser);
+        
+        List<Map<String, Object>> locations = parkings.stream()
+            .filter(p -> p.getLat() != null && p.getLng() != null)
+            .map(p -> {
+                Map<String, Object> location = new HashMap<>();
+                location.put("id", p.getId());
+                location.put("name", p.getName());
+                location.put("lat", p.getLat());
+                location.put("lng", p.getLng());
+                location.put("address", p.getAddress() != null ? p.getAddress() : "");
+                return location;
+            })
+            .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(locations);
+    }
+
 }
