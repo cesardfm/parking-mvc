@@ -36,7 +36,7 @@ public class LevelController extends BaseController {
     private ParkingService parkingService;
 
     @Autowired
-    private SiteRepository siteRepository;
+    private SiteService siteService;
 
      @Autowired
     private UserService userService;
@@ -48,8 +48,6 @@ public class LevelController extends BaseController {
         return userService.findByUsername(userDetails.getUsername());
     }
     
-    private SiteService siteService;
-
     // Mostrar paleta de colores
     @GetMapping
     public String mostrarPaletaColores(Model model) {
@@ -111,7 +109,7 @@ public class LevelController extends BaseController {
     // Ver detalles de un nivel
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/{id}")
-    public String verDetalleNivel(@PathVariable Long id, Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String verDetalleNivel(@PathVariable Long id, Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         LevelDTO level = levelService.findById(id);
 
         if (level == null) {

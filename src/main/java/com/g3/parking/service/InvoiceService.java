@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
@@ -75,11 +76,96 @@ public class InvoiceService {
 
 				y -= leading * 2;
 
+				// Información del parqueadero
+				if (req.getParkingAddress() != null) {
+					cs.beginText();
+					cs.setFont(PDType1Font.HELVETICA, 10);
+					cs.newLineAtOffset(x, y);
+					cs.showText("Dirección: " + req.getParkingAddress());
+					cs.endText();
+					y -= leading;
+				}
+
+				if (req.getParkingOrganization() != null) {
+					cs.beginText();
+					cs.setFont(PDType1Font.HELVETICA, 10);
+					cs.newLineAtOffset(x, y);
+					cs.showText("Organización: " + req.getParkingOrganization());
+					cs.endText();
+					y -= leading * 2;
+				}
+
+				// Información del vehículo
+				if (req.getVehicleLicensePlate() != null) {
+					cs.beginText();
+					cs.setFont(PDType1Font.HELVETICA_BOLD, 11);
+					cs.newLineAtOffset(x, y);
+					cs.showText("Información del Vehículo");
+					cs.endText();
+					y -= leading;
+
+					cs.beginText();
+					cs.setFont(PDType1Font.HELVETICA, 10);
+					cs.newLineAtOffset(x, y);
+					cs.showText("Placa: " + req.getVehicleLicensePlate());
+					cs.endText();
+					y -= leading;
+
+					if (req.getVehicleCategory() != null) {
+						cs.beginText();
+						cs.setFont(PDType1Font.HELVETICA, 10);
+						cs.newLineAtOffset(x, y);
+						cs.showText("Categoría: " + req.getVehicleCategory());
+						cs.endText();
+						y -= leading;
+					}
+
+					if (req.getVehicleColor() != null) {
+						cs.beginText();
+						cs.setFont(PDType1Font.HELVETICA, 10);
+						cs.newLineAtOffset(x, y);
+						cs.showText("Color: " + req.getVehicleColor());
+						cs.endText();
+						y -= leading * 2;
+					}
+				}
+
+				// Horarios
+				if (req.getEntryTime() != null) {
+					cs.beginText();
+					cs.setFont(PDType1Font.HELVETICA, 10);
+					cs.newLineAtOffset(x, y);
+					String entryText = req.getEntryTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+					cs.showText("Entrada: " + entryText);
+					cs.endText();
+					y -= leading;
+				}
+
+				if (req.getExitTime() != null) {
+					cs.beginText();
+					cs.setFont(PDType1Font.HELVETICA, 10);
+					cs.newLineAtOffset(x, y);
+					String exitText = req.getExitTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+					cs.showText("Salida: " + exitText);
+					cs.endText();
+					y -= leading * 2;
+				}
+
+				// Descuento si aplica
+				if (req.getDiscount() != null && req.getDiscount().compareTo(BigDecimal.ZERO) > 0) {
+					cs.beginText();
+					cs.setFont(PDType1Font.HELVETICA, 10);
+					cs.newLineAtOffset(x, y);
+					cs.showText("Descuento: " + req.getDiscount().toPlainString() + " COP");
+					cs.endText();
+					y -= leading;
+				}
+
 				cs.beginText();
 				cs.setFont(PDType1Font.HELVETICA_BOLD, 12);
 				cs.newLineAtOffset(x, y);
 				String amountTxt = req.getAmount() != null ? req.getAmount().toPlainString() : "0.00";
-				cs.showText("Total: " + amountTxt + " USD");
+				cs.showText("Total: " + amountTxt + " COP");
 				cs.endText();
 
 			}

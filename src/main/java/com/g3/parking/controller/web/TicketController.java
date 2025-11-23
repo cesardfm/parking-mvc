@@ -19,12 +19,17 @@ import com.g3.parking.datatransfer.RoleDTO;
 import com.g3.parking.datatransfer.TicketDTO;
 import com.g3.parking.datatransfer.UserDTO;
 import com.g3.parking.datatransfer.VehicleDTO;
+import com.g3.parking.request.InvoiceRequest;
+import com.g3.parking.service.InvoiceService;
 import com.g3.parking.service.LevelService;
 import com.g3.parking.service.ParkingService;
 import com.g3.parking.service.RoleService;
+import com.g3.parking.service.SendEmail;
 import com.g3.parking.service.SiteService;
 import com.g3.parking.service.TicketService;
 import com.g3.parking.service.VehicleCategoryService;
+
+import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -52,6 +57,12 @@ public class TicketController extends BaseController {
 
     @Autowired
     private SiteService siteService;
+
+    @Autowired
+    private SendEmail sendEmail;
+
+    @Autowired
+    private InvoiceService invoiceService;
 
     // Listar todos los parkings
     @PreAuthorize("hasAnyRole('OWNER','ADMIN','USER')")
@@ -277,14 +288,126 @@ public class TicketController extends BaseController {
 
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @PostMapping("/pagar/{id}")
-    public String postMethodName(@PathVariable Long id, Model model,
+    public String postMethodName(
+            @PathVariable Long id, 
+            @RequestParam(value = "sendEmail", defaultValue = "false") boolean shouldSendEmail,
+            @RequestParam(value = "email", required = false) String email,
+            Model model,
             @ModelAttribute("currentUser") UserDTO currentUser) {
         try {
+            // Obtener información del ticket antes de pagar
+            TicketDTO ticket = ticketService.findById(id);
+            
+            // Pagar el ticket (esto establece exitTime)
             ticketService.pay(id);
+            
+            // Recalcular después del pago para obtener valores finales
+            ticket = ticketService.findById(id);
+            BigDecimal totalPartial = ticketService.calculateTotalPartial(id);
+            BigDecimal discount = BigDecimal.ZERO;
+            if (ticket.getVehicle() != null) {
+                discount = ticketService.calculateDiscountSafe(id, totalPartial);
+                if (discount == null) {
+                    discount = BigDecimal.ZERO;
+                }
+            }
+            BigDecimal total = ticketService.calculateTotalAmount(id);
+            
+            // Generar y enviar factura si se solicitó
+            if (shouldSendEmail && email != null && !email.isBlank()) {
+                ParkingDTO parking = ticket.getSite().getLevel().getParking();
+                
+                InvoiceRequest invoice = new InvoiceRequest();
+                invoice.setInvoiceId("TKT-" + ticket.getId());
+                invoice.setPayerName(ticketService.getVehicleOwnerNameSafe(ticket.getVehicle().getId()));
+                invoice.setParkingName(parking.getName());
+                invoice.setDescription("Pago de ticket de parqueadero");
+                invoice.setAmount(total);
+                invoice.setDate(LocalDateTime.now());
+                
+                // Información del ticket
+                invoice.setVehicleLicensePlate(ticket.getVehicle().getLicensePlate());
+                invoice.setVehicleCategory(ticket.getVehicle().getCategory() != null ? 
+                    ticket.getVehicle().getCategory().getName() : null);
+                invoice.setVehicleColor(ticket.getVehicle().getColor());
+                invoice.setEntryTime(ticket.getEntryTime());
+                invoice.setExitTime(ticket.getExitTime());
+                invoice.setDiscount(discount);
+                invoice.setParkingAddress(parking.getAddress());
+                invoice.setParkingOrganization(parking.getOrganization() != null ? 
+                    parking.getOrganization().getName() : null);
+                
+                try {
+                    sendEmail.sendInvoiceEmail(email, invoice);
+                    model.addAttribute("success", "Pago procesado y factura enviada a " + email);
+                } catch (Exception emailEx) {
+                    model.addAttribute("warning", "Pago procesado pero error al enviar factura: " + emailEx.getMessage());
+                }
+            }
+            
             return "redirect:/tickets/detail/" + id;
         } catch (Exception e) {
-            model.addAttribute("error", "Error al pagar");
+            model.addAttribute("error", "Error al pagar: " + e.getMessage());
             return "redirect:/tickets/listarParkings";
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
+    @GetMapping("/factura/{id}/pdf")
+    public ResponseEntity<byte[]> descargarFacturaPdf(
+            @PathVariable Long id,
+            @ModelAttribute("currentUser") UserDTO currentUser) {
+        try {
+            TicketDTO ticket = ticketService.findById(id);
+            
+            if (ticket == null || !ticket.isPaid()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            // Calcular valores
+            BigDecimal totalPartial = ticketService.calculateTotalPartial(id);
+            BigDecimal discount = BigDecimal.ZERO;
+            if (ticket.getVehicle() != null) {
+                discount = ticketService.calculateDiscountSafe(id, totalPartial);
+                if (discount == null) {
+                    discount = BigDecimal.ZERO;
+                }
+            }
+            BigDecimal total = ticketService.calculateTotalAmount(id);
+            
+            ParkingDTO parking = ticket.getSite().getLevel().getParking();
+            
+            // Crear InvoiceRequest
+            InvoiceRequest invoice = new InvoiceRequest();
+            invoice.setInvoiceId("TKT-" + ticket.getId());
+            invoice.setPayerName(ticketService.getVehicleOwnerNameSafe(ticket.getVehicle().getId()));
+            invoice.setParkingName(parking.getName());
+            invoice.setDescription("Pago de ticket de parqueadero");
+            invoice.setAmount(total);
+            invoice.setDate(ticket.getExitTime() != null ? ticket.getExitTime() : LocalDateTime.now());
+            
+            // Información del ticket
+            invoice.setVehicleLicensePlate(ticket.getVehicle().getLicensePlate());
+            invoice.setVehicleCategory(ticket.getVehicle().getCategory() != null ? 
+                ticket.getVehicle().getCategory().getName() : null);
+            invoice.setVehicleColor(ticket.getVehicle().getColor());
+            invoice.setEntryTime(ticket.getEntryTime());
+            invoice.setExitTime(ticket.getExitTime());
+            invoice.setDiscount(discount);
+            invoice.setParkingAddress(parking.getAddress());
+            invoice.setParkingOrganization(parking.getOrganization() != null ? 
+                parking.getOrganization().getName() : null);
+            
+            // Generar PDF
+            byte[] pdfBytes = invoiceService.generateInvoicePdf(invoice);
+            
+            return ResponseEntity.ok()
+                .header("Content-Type", "application/pdf")
+                .header("Content-Disposition", "attachment; filename=\"factura-" + ticket.getId() + ".pdf\"")
+                .body(pdfBytes);
+                
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
         }
     }
 

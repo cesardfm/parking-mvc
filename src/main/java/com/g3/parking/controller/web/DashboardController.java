@@ -23,8 +23,6 @@ public class DashboardController extends BaseController{
         return "map";   
     }
     
-    
-    
     @GetMapping("/dashboard")
     public String dashboard(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         // Últimos parqueaderos (máximo 5)
