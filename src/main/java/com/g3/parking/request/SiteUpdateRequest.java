@@ -3,6 +3,7 @@ package com.g3.parking.request;
 public class SiteUpdateRequest {
     private Long siteId;
     private String status;
+    private String vehicleType;
 
     public Long getSiteId() {
         return siteId;
@@ -18,5 +19,13 @@ public class SiteUpdateRequest {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
     }
 }

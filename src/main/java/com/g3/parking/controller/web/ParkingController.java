@@ -6,12 +6,17 @@ import com.g3.parking.datatransfer.UserDTO;
 import com.g3.parking.service.LevelService;
 import com.g3.parking.service.ParkingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/parking")
@@ -78,6 +83,18 @@ public class ParkingController extends BaseController {
         return "parking/list";
     }
 
+    // Listar parkings que administra el usuario (ADMIN)
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/adminlist")
+    public String listarParkingsAdmin(Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
+        if (currentUser == null) {
+            model.addAttribute("error", "Usuario no autenticado");
+            return "redirect:/login";
+        }
+        model.addAttribute("parkings", parkingService.findByAdmin(currentUser));
+        return "parking/list";
+    }
+
     // Ver detalles de un parking específico
     @PreAuthorize("hasAnyRole('OWNER','ADMIN','USER')")
     @GetMapping("/{id}")
@@ -139,4 +156,30 @@ public class ParkingController extends BaseController {
             return "redirect:/parking/" + id;
         }
     }
+
+    // API: Obtener ubicaciones de parqueaderos de la organización del usuario
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
+    @GetMapping("/api/locations")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> getParkingLocations(
+            @ModelAttribute("currentUser") UserDTO currentUser) {
+        
+        List<ParkingDTO> parkings = parkingService.findByUserOrganization(currentUser);
+        
+        List<Map<String, Object>> locations = parkings.stream()
+            .filter(p -> p.getLat() != null && p.getLng() != null)
+            .map(p -> {
+                Map<String, Object> location = new HashMap<>();
+                location.put("id", p.getId());
+                location.put("name", p.getName());
+                location.put("lat", p.getLat());
+                location.put("lng", p.getLng());
+                location.put("address", p.getAddress() != null ? p.getAddress() : "");
+                return location;
+            })
+            .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(locations);
+    }
+
 }

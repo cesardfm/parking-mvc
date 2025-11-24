@@ -22,15 +22,13 @@ public class UserService extends BaseService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private static Integer counter = 0;
-    private final OrganizationRepository organizationRepository;
 
     public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder,
             OrganizationRepository organizationrRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
-        this.organizationRepository = organizationrRepository;
+        // this.organizationRepository = organizationrRepository;
 
     }
 

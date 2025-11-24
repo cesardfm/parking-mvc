@@ -1,14 +1,25 @@
 package com.g3.parking.controller.web;
 
+import com.g3.parking.model.Level;
+import com.g3.parking.model.Parking;
+import com.g3.parking.model.Site;
+import com.g3.parking.model.User;
+import com.g3.parking.repository.LevelRepository;
+import com.g3.parking.repository.ParkingRepository;
+import com.g3.parking.repository.SiteRepository;
+import com.g3.parking.service.UserService;
 import com.g3.parking.datatransfer.LevelDTO;
 import com.g3.parking.datatransfer.ParkingDTO;
 import com.g3.parking.datatransfer.SiteDTO;
+import com.g3.parking.datatransfer.UserDTO;
 import com.g3.parking.service.LevelService;
 import com.g3.parking.service.ParkingService;
 import com.g3.parking.service.SiteService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +38,16 @@ public class LevelController extends BaseController {
     @Autowired
     private SiteService siteService;
 
+     @Autowired
+    private UserService userService;
+
+    @ModelAttribute("currentUser")
+    public UserDTO getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null)
+            return null;
+        return userService.findByUsername(userDetails.getUsername());
+    }
+    
     // Mostrar paleta de colores
     @GetMapping
     public String mostrarPaletaColores(Model model) {
@@ -88,7 +109,7 @@ public class LevelController extends BaseController {
     // Ver detalles de un nivel
     @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
     @GetMapping("/{id}")
-    public String verDetalleNivel(@PathVariable Long id, Model model) {
+    public String verDetalleNivel(@PathVariable Long id, Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         LevelDTO level = levelService.findById(id);
 
         if (level == null) {
@@ -99,6 +120,11 @@ public class LevelController extends BaseController {
         model.addAttribute("level", level);
         model.addAttribute("sites", level.getSites());
 
+        UserDTO user = userService.findByUsername(currentUser.getUsername());
+        if (user.hasRole("ROLE_ADMIN")) {
+            return "admin/level-detail-admin";
+        }
+      
         return "level/detail";
     }
 

@@ -6,6 +6,8 @@ import com.g3.parking.model.Organization;
 import com.g3.parking.model.Parking;
 import com.g3.parking.model.User;
 import com.g3.parking.repository.ParkingRepository;
+import com.g3.parking.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,9 @@ public class ParkingService extends BaseService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired 
+    private UserRepository userRepository;
 
     public List<ParkingDTO> findAll() {
         List<Parking> parkings = parkingRepository.findAll();
@@ -53,10 +58,11 @@ public class ParkingService extends BaseService {
         if (user.getOrganization() == null) {
             throw new IllegalStateException("El usuario no pertenece a ninguna organización");
         }
-        List<Parking> parkings = parkingRepository.findByOrganization(convert(user.getOrganization(), Organization.class));
+        List<Parking> parkings = parkingRepository
+                .findByOrganization(convert(user.getOrganization(), Organization.class));
         return parkings.stream()
-            .map(parking -> convert(parking, ParkingDTO.class))
-            .collect(Collectors.toList());
+                .map(parking -> convert(parking, ParkingDTO.class))
+                .collect(Collectors.toList());
     }
 
     // Crear parking con validaciones
@@ -152,5 +158,23 @@ public class ParkingService extends BaseService {
         // Remover
         parking.removeAdmin(admin);
         parkingRepository.save(parking);
+    }
+
+    // Obtener parkings que administra un usuario (admin)
+    public List<ParkingDTO> findByAdmin(UserDTO admin) {
+        if (admin == null) {
+            throw new IllegalArgumentException("Admin no puede ser null");
+        }
+        User currentUser = convert(admin, User.class);
+        List<Parking> parkings = parkingRepository.findByAdminsContaining(currentUser);
+
+        return parkings.stream()
+                .map(parking -> convert(parkings, ParkingDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<Parking> findByAdminId(Long adminId) {
+        if (adminId == null) throw new IllegalArgumentException("adminId no puede ser null");
+        return parkingRepository.findByAdmins_Id(adminId);
     }
 }
