@@ -65,7 +65,9 @@ public class ControllerImage {
             placa.setImagenEscalaGrises(resultado.getImagenEscalaGrises());
             placa.setImagenReducida(resultado.getImagenReducida());
             placa.setImagenBrillo(resultado.getImagenBrillo());
-            placa.setImagenRotada(resultado.getImagenRotada());
+            resultado.getImagenesRotadas().get("45");
+            resultado.getImagenesRotadas().get("90");
+            resultado.getImagenesRotadas().get("180");
             placa.setTiempoProcesamiento(resultado.getTiempoProcesamiento());
 
             // 🔥 Detectar placa con OpenALPR (retorna PlacaResponse)

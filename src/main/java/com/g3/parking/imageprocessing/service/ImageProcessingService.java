@@ -10,6 +10,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,33 +44,49 @@ public class ImageProcessingService {
                 () -> aplicarBrillo(imagenOriginal, 1.3f), executorService
         );
 
-        CompletableFuture<byte[]> filtroRotacion = CompletableFuture.supplyAsync(
-                () -> aplicarRotacion(imagenOriginal, 45), executorService
+        // 🔥 Nueva función: retorna TODAS las rotaciones en un Map
+        CompletableFuture<Map<String, byte[]>> filtroRotaciones = CompletableFuture.supplyAsync(
+                () -> aplicarRotaciones(imagenOriginal), executorService
         );
 
-        CompletableFuture.allOf(filtroGrises, filtroReduccion, filtroBrillo, filtroRotacion).join();
+        CompletableFuture.allOf(
+                filtroGrises, filtroReduccion, filtroBrillo, filtroRotaciones
+        ).join();
 
         long endTime = System.currentTimeMillis();
         long tiempoProcesamiento = endTime - startTime;
 
-        // ================================
-        // 🔥 GUARDAR IMÁGENES EN DISCO
-        // ================================
+        // Guardar imágenes
         guardarImagenEnDirectorio(imageBytes, "original");
         guardarImagenEnDirectorio(filtroGrises.get(), "gris");
         guardarImagenEnDirectorio(filtroReduccion.get(), "reducida");
         guardarImagenEnDirectorio(filtroBrillo.get(), "brillo");
-        guardarImagenEnDirectorio(filtroRotacion.get(), "rotada");
-        // ================================
+
+        Map<String, byte[]> rotaciones = filtroRotaciones.get();
+        guardarImagenEnDirectorio(rotaciones.get("rotacion_45"), "rotada_45");
+        guardarImagenEnDirectorio(rotaciones.get("rotacion_90"), "rotada_90");
+        guardarImagenEnDirectorio(rotaciones.get("rotacion_180"), "rotada_180");
 
         return new ImagenProcesadaResult(
                 imageBytes,
                 filtroGrises.get(),
                 filtroReduccion.get(),
                 filtroBrillo.get(),
-                filtroRotacion.get(),
+                rotaciones,
                 tiempoProcesamiento
         );
+    }
+    private void guardarImagenEnDirectorio(byte[] imagenBytes, String nombreArchivo) {
+        try {
+            String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
+            Path carpeta = Paths.get("filtros/" + timestamp);
+            Files.createDirectories(carpeta);
+            Path path = carpeta.resolve(nombreArchivo + ".png");
+            Files.write(path, imagenBytes);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error guardando imagen en disco", e);
+        }
     }
 
 
@@ -106,7 +124,7 @@ public class ImageProcessingService {
             throw new RuntimeException("Error reduciendo tamaño", e);
         }
     }
-    
+
    
     private byte[] aplicarBrillo(BufferedImage imagen, float factor) {
         try {
@@ -137,36 +155,75 @@ public class ImageProcessingService {
             throw new RuntimeException("Error aplicando brillo", e);
         }
     }
-    
-    
-    private byte[] aplicarRotacion(BufferedImage imagen, int grados) {
+
+    public Map<String, byte[]> aplicarRotaciones(BufferedImage imagen) {
+        Map<String, byte[]> resultados = new HashMap<>();
+
+        resultados.put("rotacion_45", rotarGenerico(imagen, 45));
+        resultados.put("rotacion_90", bufferedImage2Bytes(rotar90(imagen)));
+        resultados.put("rotacion_180", bufferedImage2Bytes(rotar180(imagen)));
+
+        return resultados;
+    }
+
+
+    private byte[] rotarGenerico(BufferedImage imagen, int grados) {
         try {
             double radianes = Math.toRadians(grados);
-            
+
             double sin = Math.abs(Math.sin(radianes));
             double cos = Math.abs(Math.cos(radianes));
             int newWidth = (int) Math.floor(imagen.getWidth() * cos + imagen.getHeight() * sin);
             int newHeight = (int) Math.floor(imagen.getHeight() * cos + imagen.getWidth() * sin);
-            
+
             BufferedImage rotatedImage = new BufferedImage(newWidth, newHeight, imagen.getType());
             Graphics2D g2d = rotatedImage.createGraphics();
-            
+
             AffineTransform at = new AffineTransform();
             at.translate(newWidth / 2.0, newHeight / 2.0);
             at.rotate(radianes);
             at.translate(-imagen.getWidth() / 2.0, -imagen.getHeight() / 2.0);
-            
+
             g2d.setTransform(at);
             g2d.drawImage(imagen, 0, 0, null);
             g2d.dispose();
-            
+
             return bufferedImage2Bytes(rotatedImage);
+
         } catch (Exception e) {
             throw new RuntimeException("Error rotando imagen", e);
         }
     }
-    
-    
+
+
+    private BufferedImage rotar90(BufferedImage img) {
+        int w = img.getWidth();
+        int h = img.getHeight();
+        BufferedImage salida = new BufferedImage(h, w, img.getType());
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                salida.setRGB(h - 1 - y, x, img.getRGB(x, y));
+            }
+        }
+        return salida;
+    }
+
+    private BufferedImage rotar180(BufferedImage img) {
+        int w = img.getWidth();
+        int h = img.getHeight();
+        BufferedImage salida = new BufferedImage(w, h, img.getType());
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                salida.setRGB(w - 1 - x, h - 1 - y, img.getRGB(x, y));
+            }
+        }
+        return salida;
+    }
+
+
+
+
+
     private byte[] convertirBase64ABytes(String base64) {
         if (base64.contains(",")) {
             base64 = base64.split(",")[1];
@@ -188,52 +245,40 @@ public class ImageProcessingService {
             throw new RuntimeException("Error convirtiendo imagen a bytes", e);
         }
     }
-    
-    
+
     public static class ImagenProcesadaResult {
         private final byte[] imagenOriginal;
         private final byte[] imagenEscalaGrises;
         private final byte[] imagenReducida;
         private final byte[] imagenBrillo;
-        private final byte[] imagenRotada;
+        private final Map<String, byte[]> imagenesRotadas;
         private final long tiempoProcesamiento;
-        
-        public ImagenProcesadaResult(byte[] imagenOriginal, byte[] imagenEscalaGrises, 
-                                     byte[] imagenReducida, byte[] imagenBrillo, 
-                                     byte[] imagenRotada, long tiempoProcesamiento) {
+
+        public ImagenProcesadaResult(byte[] imagenOriginal,
+                                     byte[] imagenEscalaGrises,
+                                     byte[] imagenReducida,
+                                     byte[] imagenBrillo,
+                                     Map<String, byte[]> imagenesRotadas,
+                                     long tiempoProcesamiento) {
             this.imagenOriginal = imagenOriginal;
             this.imagenEscalaGrises = imagenEscalaGrises;
             this.imagenReducida = imagenReducida;
             this.imagenBrillo = imagenBrillo;
-            this.imagenRotada = imagenRotada;
+            this.imagenesRotadas = imagenesRotadas;
             this.tiempoProcesamiento = tiempoProcesamiento;
         }
-        
+
         public byte[] getImagenOriginal() { return imagenOriginal; }
+
         public byte[] getImagenEscalaGrises() { return imagenEscalaGrises; }
+
         public byte[] getImagenReducida() { return imagenReducida; }
+
         public byte[] getImagenBrillo() { return imagenBrillo; }
-        public byte[] getImagenRotada() { return imagenRotada; }
+
+        public Map<String, byte[]> getImagenesRotadas() { return imagenesRotadas; }
+
         public long getTiempoProcesamiento() { return tiempoProcesamiento; }
-    }
-    private void guardarImagenEnDirectorio(byte[] imagenBytes, String nombreArchivo) {
-        try {
-
-            String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
-
-            Path carpeta = Paths.get("filtros/" + timestamp);
-
-            // Crear carpeta si no existe
-            Files.createDirectories(carpeta);
-
-            // Ruta final del archivo
-            Path path = carpeta.resolve(nombreArchivo + ".png");
-
-            Files.write(path, imagenBytes);
-
-        } catch (IOException e) {
-            throw new RuntimeException("Error guardando imagen en disco", e);
-        }
     }
 
 
