@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/dashboard :: layout(
+          pageTitle='Mapa',
+          activeMenu='map',
+          contentTemplate=~{::content}
+      )}">
+<head>
+    <title>Mapa de Parqueaderos</title>
+</head>
+<body>
+
+<div th:fragment="content">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Mapa de Parqueaderos</h1>
+                <p class="text-sm text-gray-500">Visualiza la ubicación de los parqueaderos</p>
+            </div>
+        </div>
+
+        <!-- Contenedor del mapa -->
+        <div id="map" style="height: 600px; width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
+    </div>
+
+    <!-- Scripts del mapa dentro del content -->
+    <script th:inline="javascript">
+        function initMap() {
+            console.log('Iniciando mapa...');
+            
+            // Coordenadas por defecto (Villavicencio, Colombia)
+            const defaultCenter = { lat: 4.1420, lng: -73.6266 };
+
+            // Crear el mapa
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 13,
+                center: defaultCenter,
+                mapTypeControl: true,
+                streetViewControl: true,
+                fullscreenControl: true,
+            });
+
+            console.log('Mapa creado');
+
+            // Cargar parqueaderos reales desde la API
+            fetch('/parking/api/locations')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al cargar parqueaderos');
+                    }
+                    return response.json();
+                })
+                .then(parkings => {
+                    console.log('Parqueaderos cargados:', parkings.length);
+                    
+                    if (parkings.length === 0) {
+                        console.log('No hay parqueaderos con ubicación');
+                        return;
+                    }
+
+                    // Centrar el mapa en el primer parqueadero
+                    if (parkings[0]) {
+                        map.setCenter({ lat: parkings[0].lat, lng: parkings[0].lng });
+                    }
+
+                    // Añadir marcadores al mapa
+                    parkings.forEach(parking => {
+                        const marker = new google.maps.Marker({
+                            position: { lat: parking.lat, lng: parking.lng },
+                            map: map,
+                            title: parking.name,
+                            animation: google.maps.Animation.DROP
+                        });
+
+                        // Info window al hacer clic
+                        const infoWindow = new google.maps.InfoWindow({
+                            content: `
+                                <div style="padding: 8px;">
+                                    <h3 style="margin: 0 0 8px 0; font-weight: bold;">${parking.name}</h3>
+                                    ${parking.address ? `<p style="margin: 4px 0; color: #666; font-size: 13px;">${parking.address}</p>` : ''}
+                                    <a href="/parking/${parking.id}" style="color: #2563eb; text-decoration: none;">Ver detalles</a>
+                                </div>
+                            `
+                        });
+
+                        marker.addListener('click', () => {
+                            infoWindow.open(map, marker);
+                        });
+                    });
+                    
+                    console.log('Marcadores añadidos:', parkings.length);
+                })
+                .catch(error => {
+                    console.error('Error cargando parqueaderos:', error);
+                    alert('Error al cargar los parqueaderos. Por favor, recarga la página.');
+                });
+        }
+
+        // Asegurarse de que initMap esté disponible globalmente
+        window.initMap = initMap;
+    </script>
+    
+    <!-- Cargar la API de Google Maps -->
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTpt5Wwk9s4sSVG8lmVvW8LDgmWFsrcXw&callback=initMap">
+    </script>
+</div>
+
+</body>
+</html>

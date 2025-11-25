@@ -1,0 +1,21 @@
+package com.g3.parking.datatransfer;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrganizationDTO {
+    private Long id;
+    private String name;
+    private String description;
+    private String taxId; // RUC, NIT, etc.
+    private String address;
+    private String phone;
+    private String email;
+    private Boolean active;
+}

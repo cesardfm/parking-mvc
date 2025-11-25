@@ -1,6 +1,6 @@
 package com.g3.parking.service;
 
-import com.g3.parking.model.User;
+import com.g3.parking.datatransfer.UserDTO;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 
 public class MainUser implements UserDetails {
 
-    private final User user;
+    private final UserDTO user;
 
-    public MainUser(User user) {
+    public MainUser(UserDTO user) {
         this.user = user;
     }
 

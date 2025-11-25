@@ -85,7 +85,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
             
             <div class="p-6">
                 <!-- Parkings List -->
-                <div th:if="${!recentParkings.isEmpty()}" class="space-y-4">
+                <div th:if="${recentParkings != null and !recentParkings.isEmpty()}" class="space-y-4">
                     <div th:each="parking, iterStat : ${recentParkings}" 
                          th:if="${iterStat.index < 5}"
                          class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
@@ -114,7 +114,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
                 </div>
                 
                 <!-- Empty State -->
-                <div sec:authorize="hasAnyRole('OWNER')" th:if="${recentParkings.isEmpty()}">
+                <div sec:authorize="hasAnyRole('OWNER')" th:if="${recentParkings == null or recentParkings.isEmpty()}">
                     <div th:replace="~{fragments/cards :: empty-state(
                         icon='🅿️', 
                         title='No hay parqueaderos', 

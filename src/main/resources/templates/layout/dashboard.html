@@ -27,7 +27,15 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="layout(
             <nav class="flex-1 px-4 py-6 overflow-y-auto">
                 <div class="space-y-1">
                     <!-- Dashboard -->
-                    <a href="/dashboard" 
+                    <a sec:authorize="hasAnyRole('ADMIN')" href="/admin/dashboard" 
+                       th:classappend="${activeMenu == 'dashboard'} ? 'bg-primary-50 text-primary-700 border-primary-500' : 'text-gray-700 hover:bg-gray-50 border-transparent'"
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all border-l-4 group">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                        <span class="font-medium">Dashboard</span>
+                    </a>
+                    <a sec:authorize="hasAnyRole('OWNER')" href="/dashboard" 
                        th:classappend="${activeMenu == 'dashboard'} ? 'bg-primary-50 text-primary-700 border-primary-500' : 'text-gray-700 hover:bg-gray-50 border-transparent'"
                        class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all border-l-4 group">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,7 +45,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="layout(
                     </a>
                     
                     <!-- Parqueaderos -->
-                    <a href="/parking/listar" 
+                    <a sec:authorize="hasAnyRole('OWNER', 'ADMIN', 'USER')" href="/parking/listar" 
                        th:classappend="${activeMenu == 'parkings'} ? 'bg-primary-50 text-primary-700 border-primary-500' : 'text-gray-700 hover:bg-gray-50 border-transparent'"
                        class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all border-l-4 group">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,24 +55,64 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="layout(
                     </a>
                     
                     <!-- Niveles -->
-                    <a sec:authorize="hasAnyRole('OWNER')" href="/levels" 
+                    <!-- <a sec:authorize="hasAnyRole('OWNER')" href="/levels" 
                        th:classappend="${activeMenu == 'levels'} ? 'bg-primary-50 text-primary-700 border-primary-500' : 'text-gray-700 hover:bg-gray-50 border-transparent'"
                        class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all border-l-4 group">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
                         </svg>
                         <span class="font-medium">Niveles</span>
-                    </a>
+                    </a> -->
                     
-                    <!-- Espacios -->
-                    <a sec:authorize="hasAnyRole('OWNER')" href="/users/list" 
+                    <!-- Usuarios -->
+                    <a sec:authorize="hasAnyRole('OWNER', 'ADMIN')" href="/users/list" 
                        th:classappend="${activeMenu == 'users'} ? 'bg-primary-50 text-primary-700 border-primary-500' : 'text-gray-700 hover:bg-gray-50 border-transparent'"
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all border-l-4 group">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        <span class="font-medium">Usuarios</span>
+                    </a>
+
+                    <!-- Tiquetes -->
+                    <a sec:authorize="hasAnyRole('OWNER', 'ADMIN', 'USER')" href="/tickets/listarParkings" 
+                       th:classappend="${activeMenu == 'tickets'} ? 'bg-primary-50 text-primary-700 border-primary-500' : 'text-gray-700 hover:bg-gray-50 border-transparent'"
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all border-l-4 group">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                        </svg>
+                        <span class="font-medium">Tiquetes</span>
+                    </a>
+
+                    <!-- Categorias -->
+                    <a sec:authorize="hasAnyRole('OWNER', 'ADMIN')" href="/categories/listar" 
+                       th:classappend="${activeMenu == 'categories'} ? 'bg-primary-50 text-primary-700 border-primary-500' : 'text-gray-700 hover:bg-gray-50 border-transparent'"
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all border-l-4 group">
+                        
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+</svg>
+                            <span class="font-medium">Categorias</span>
+                    </a>
+                    <a sec:authorize="hasAnyRole('OWNER', 'ADMIN')" href="/map" 
+                       th:classappend="${activeMenu == 'map'} ? 'bg-primary-50 text-primary-700 border-primary-500' : 'text-gray-700 hover:bg-gray-50 border-transparent'"
                        class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all border-l-4 group">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                         </svg>
-                        <span class="font-medium">Usuarios</span>
+                        <span class="font-medium">Mapa</span>
                     </a>
+
+                    <!-- Planes -->
+                    <a sec:authorize="hasAnyRole('OWNER', 'ADMIN')" href="/plans/listar" 
+                       th:classappend="${activeMenu == 'plans'} ? 'bg-primary-50 text-primary-700 border-primary-500' : 'text-gray-700 hover:bg-gray-50 border-transparent'"
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all border-l-4 group">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+</svg>
+                        <span class="font-medium">Planes</span>
+                    </a>
+
                 </div>
                 
                 <!-- Sección de herramientas -->
@@ -94,17 +142,17 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="layout(
             </nav>
             
             <!-- User section -->
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl">
+            <a class="p-4 border-t border-gray-200 cursor-pointer" th:href="@{/users/detail/{id}(id=${currentUser.id})}">
+                <div class="flex items-center gap-3 px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-xl">
                     <div class="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center text-white font-semibold">
-                        A
+                        U
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-gray-900 truncate">Admin</p>
-                        <p class="text-xs text-gray-500 truncate">admin@parking.com</p>
+                        <p class="text-sm font-semibold text-gray-900 truncate" th:text="${currentUser != null} ? ${currentUser.username}:'Admin'"></p>
+                        <p class="text-xs text-gray-500 truncate" th:text="${currentUser != null and currentUser.organization != null} ? ${currentUser.organization.name}:'admin@parking.com'"></p>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
     </aside>
     

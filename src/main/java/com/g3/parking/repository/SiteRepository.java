@@ -15,6 +15,8 @@ public interface SiteRepository extends JpaRepository<Site, Long> {
     
     // Buscar por status
     List<Site> findByStatus(String status);
+
+    List<Site> findByStatusAndLevel_Parking_Id(String status, Long parkingId);
     
     // Buscar sitios por nivel
     List<Site> findByLevelId(Long levelId);
