@@ -62,12 +62,6 @@ public class ControllerImage {
                     imageProcessingService.procesarImagenConcurrente(imagenBase64);
 
             placa.setImagenOriginal(resultado.getImagenOriginal());
-            placa.setImagenEscalaGrises(resultado.getImagenEscalaGrises());
-            placa.setImagenReducida(resultado.getImagenReducida());
-            placa.setImagenBrillo(resultado.getImagenBrillo());
-            resultado.getImagenesRotadas().get("45");
-            resultado.getImagenesRotadas().get("90");
-            resultado.getImagenesRotadas().get("180");
             placa.setTiempoProcesamiento(resultado.getTiempoProcesamiento());
 
             // 🔥 Detectar placa con OpenALPR (retorna PlacaResponse)
@@ -126,39 +120,37 @@ public class ControllerImage {
     @GetMapping("/placa/{id}")
     public ResponseEntity<Map<String, Object>> obtenerPlaca(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
-        
+
         Optional<PlacaVehiculo> placaOpt = placaVehiculoRepository.findById(id);
-        
+
         if (placaOpt.isEmpty()) {
             response.put("success", false);
             response.put("message", "Placa no encontrada");
             return ResponseEntity.notFound().build();
         }
-        
+
         PlacaVehiculo placa = placaOpt.get();
-        
+
         response.put("success", true);
         response.put("id", placa.getId());
         response.put("placaTexto", placa.getPlacaTexto());
         response.put("fechaRegistro", placa.getFechaRegistro());
         response.put("estadoProcesamiento", placa.getEstadoProcesamiento());
         response.put("tiempoProcesamiento", placa.getTiempoProcesamiento());
-        
+
+        // Solo imagen original
         response.put("imagenOriginal", convertirBytesABase64(placa.getImagenOriginal()));
-        response.put("imagenEscalaGrises", convertirBytesABase64(placa.getImagenEscalaGrises()));
-        response.put("imagenReducida", convertirBytesABase64(placa.getImagenReducida()));
-        response.put("imagenBrillo", convertirBytesABase64(placa.getImagenBrillo()));
-        response.put("imagenRotada", convertirBytesABase64(placa.getImagenRotada()));
-        
+
         return ResponseEntity.ok(response);
     }
-    
-    
+
+
+
     @GetMapping("/placas")
     public ResponseEntity<List<Map<String, Object>>> listarPlacas() {
         List<PlacaVehiculo> placas = placaVehiculoRepository.findAll();
         List<Map<String, Object>> resultado = new ArrayList<>();
-        
+
         for (PlacaVehiculo placa : placas) {
             Map<String, Object> item = new HashMap<>();
             item.put("id", placa.getId());
@@ -166,24 +158,22 @@ public class ControllerImage {
             item.put("fechaRegistro", placa.getFechaRegistro());
             item.put("estadoProcesamiento", placa.getEstadoProcesamiento());
             item.put("tiempoProcesamiento", placa.getTiempoProcesamiento());
-            
+
+            // Solo indicador de imagen original
             item.put("tieneImagenOriginal", placa.getImagenOriginal() != null);
-            item.put("tieneImagenGrises", placa.getImagenEscalaGrises() != null);
-            item.put("tieneImagenReducida", placa.getImagenReducida() != null);
-            item.put("tieneImagenBrillo", placa.getImagenBrillo() != null);
-            item.put("tieneImagenRotada", placa.getImagenRotada() != null);
-            
+
             if (placa.getImagenOriginal() != null) {
                 item.put("thumbnailOriginal", convertirBytesABase64(placa.getImagenOriginal()));
             }
-            
+
             resultado.add(item);
         }
-        
+
         return ResponseEntity.ok(resultado);
     }
-    
-    
+
+
+
     @DeleteMapping("/placa/{id}")
     public ResponseEntity<Map<String, Object>> eliminarPlaca(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
@@ -199,55 +189,40 @@ public class ControllerImage {
             return ResponseEntity.notFound().build();
         }
     }
-    
-    
+
+
     @GetMapping("/estadisticas")
     public ResponseEntity<Map<String, Object>> obtenerEstadisticas() {
         Map<String, Object> stats = new HashMap<>();
-        
+
         List<PlacaVehiculo> todasLasPlacas = placaVehiculoRepository.findAll();
-        
+
         stats.put("totalPlacas", todasLasPlacas.size());
         stats.put("placasCompletadas", todasLasPlacas.stream()
-            .filter(p -> "COMPLETADO".equals(p.getEstadoProcesamiento()))
-            .count());
-        
+                .filter(p -> "COMPLETADO".equals(p.getEstadoProcesamiento()))
+                .count());
+
         long conImagenOriginal = todasLasPlacas.stream()
-            .filter(p -> p.getImagenOriginal() != null)
-            .count();
-        long conImagenGrises = todasLasPlacas.stream()
-            .filter(p -> p.getImagenEscalaGrises() != null)
-            .count();
-        long conImagenReducida = todasLasPlacas.stream()
-            .filter(p -> p.getImagenReducida() != null)
-            .count();
-        long conImagenBrillo = todasLasPlacas.stream()
-            .filter(p -> p.getImagenBrillo() != null)
-            .count();
-        long conImagenRotada = todasLasPlacas.stream()
-            .filter(p -> p.getImagenRotada() != null)
-            .count();
-        
+                .filter(p -> p.getImagenOriginal() != null)
+                .count();
+
         Map<String, Long> imagenesGuardadas = new HashMap<>();
         imagenesGuardadas.put("original", conImagenOriginal);
-        imagenesGuardadas.put("escalaGrises", conImagenGrises);
-        imagenesGuardadas.put("reducida", conImagenReducida);
-        imagenesGuardadas.put("brillo", conImagenBrillo);
-        imagenesGuardadas.put("rotada", conImagenRotada);
-        
+
         stats.put("imagenesGuardadas", imagenesGuardadas);
-        
+
         double tiempoPromedio = todasLasPlacas.stream()
-            .filter(p -> p.getTiempoProcesamiento() != null)
-            .mapToLong(PlacaVehiculo::getTiempoProcesamiento)
-            .average()
-            .orElse(0.0);
-        
+                .filter(p -> p.getTiempoProcesamiento() != null)
+                .mapToLong(PlacaVehiculo::getTiempoProcesamiento)
+                .average()
+                .orElse(0.0);
+
         stats.put("tiempoPromedioMs", Math.round(tiempoPromedio));
-        
+
         return ResponseEntity.ok(stats);
     }
-    
+
+
     private String convertirBytesABase64(byte[] bytes) {
         if (bytes == null) return null;
         return "data:image/png;base64," + Base64.getEncoder().encodeToString(bytes);
