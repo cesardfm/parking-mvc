@@ -43,6 +43,7 @@ public class SiteService extends BaseService {
     public boolean changeStatus(Long id, String status){
         try {
             Site site = siteRepo.getReferenceById(id);
+            System.out.println("estado del sitio"+ status);
             site.setStatus(status);
             siteRepo.save(site);
             return true;

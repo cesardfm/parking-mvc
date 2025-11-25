@@ -40,6 +40,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                                                 .requestMatchers("/", "/publico/**").permitAll() // permite acceso a la página de bienvenida
                                                 .requestMatchers("/api/auth/**").permitAll()
+                                                .requestMatchers("/api/sites/**").permitAll()   
                                                 .requestMatchers("/api/**").authenticated()
                                                 .requestMatchers("/owner/**").hasRole("OWNER")
                                                 .requestMatchers("/admin/**").hasAnyRole("ADMIN", "OWNER")

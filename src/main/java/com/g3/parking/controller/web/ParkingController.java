@@ -79,7 +79,20 @@ public class ParkingController extends BaseController {
     @PreAuthorize("hasAnyRole('OWNER','ADMIN','USER')")
     @GetMapping("/listar")
     public String listarParkings(Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
-        model.addAttribute("parkings", parkingService.findByUserOrganization(currentUser));
+        List<ParkingDTO> parkings;
+
+        // Si es ADMIN, mostrar solo los parkings que administra
+        if (currentUser.hasRole("ROLE_ADMIN") && !currentUser.hasRole("ROLE_OWNER")) {
+            parkings = parkingService.findByAdminId(currentUser.getId());
+            model.addAttribute("titulo", "Mis Parqueaderos Asignados");
+        }
+        // Si es OWNER o USER, mostrar todos los parkings de la organización
+        else {
+            parkings = parkingService.findByUserOrganization(currentUser);
+            model.addAttribute("titulo", "Parqueaderos de la Organización");
+        }
+
+        model.addAttribute("parkings", parkings);
         return "parking/list";
     }
 

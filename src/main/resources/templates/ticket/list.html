@@ -33,7 +33,7 @@
             </div>
             <div class="flex gap-2" >
               <a
-                sec:authorize="hasAnyRole('OWNER')"
+                sec:authorize="hasAnyRole('OWNER','ADMIN')"
                 th:if="${siteAvailable} != null and ${siteAvailable} == true"
                 th:href="@{/tickets/nuevo/{parkingId}(parkingId=${parkingId})}"
                 class="inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold px-4 py-2 rounded-xl transition-all transform hover:scale-105 shadow-md"
@@ -86,7 +86,7 @@
           </div>
 
           <!-- Tickets List -->
-          <div class="bg-white shadow-md rounded overflow-hidden">
+          <div class="bg-white rounded overflow-hidden">
             <table class="min-w-full">
               <thead class="bg-gray-100">
                 <tr>
@@ -122,10 +122,10 @@
                   </th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
+              <tbody class="bg-white">
                 <tr
                   th:each="ticket : ${tickets}"
-                  class="bg-gradient-to-br from-gray-300 to-white border border-gray-200 rounded-xl p-5 hover:shadow-md hover:border-primary-200 transition-all group cursor-pointer"
+                  class=" border border-gray-200 rounded-xl p-5 hover:shadow-md hover:border-primary-200 transition-all group cursor-pointer"
                   th:onclick="|window.location.href='/tickets/detail/'+${ticket.id}|"
                 >
                   <td class="px-6 py-4 whitespace-nowrap">

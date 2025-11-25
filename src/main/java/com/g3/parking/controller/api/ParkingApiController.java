@@ -26,9 +26,6 @@ public class ParkingApiController {
     @Autowired
     private LevelService levelService;
 
-    // @Autowired
-    // private SiteService siteService;
-
     @Autowired
     private TicketService ticketService;
 
@@ -116,11 +113,6 @@ public class ParkingApiController {
         }
     }
 
-    /**
-     * 4. Recibo de pago de un usuario
-     * GET /api/parking/receipt/{ticketId}
-     * (Este endpoint podría estar en TicketApiController, pero lo incluyo aquí por completitud)
-     */
     @GetMapping("/receipt/{ticketId}")
     public ResponseEntity<Map<String, Object>> obtenerReciboPago(@PathVariable Long ticketId) {
         // Este servicio debería implementarse en un TicketApiController
@@ -130,10 +122,6 @@ public class ParkingApiController {
         return ResponseEntity.status(501).body(response);
     }
 
-    /**
-     * 5. Ubicación de vehículo en un parqueadero por número de placa
-     * GET /api/parking/{parkingId}/vehicle/{licensePlate}
-     */
     @GetMapping("/{parkingId}/vehicle/{licensePlate}")
     public ResponseEntity<Map<String, Object>> ubicarVehiculo(
             @PathVariable Long parkingId,
