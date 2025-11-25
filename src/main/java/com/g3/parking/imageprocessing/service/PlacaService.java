@@ -1,0 +1,184 @@
+package com.g3.parking.imageprocessing.service;
+
+import com.g3.parking.imageprocessing.DTO.PlacaResponse;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@Service
+public class PlacaService {
+
+    private static final Logger log = LoggerFactory.getLogger(PlacaService.class);
+
+    @Value("${alpr.path}")
+    private String alprPath;
+
+    /**
+     * → Recibe MultipartFile desde tu controller
+     */
+    public PlacaResponse detectarPlate(MultipartFile imagen) {
+        try {
+            log.info("⏺ Recibida imagen MultipartFile");
+            log.info("⏺ Nombre original: {}", imagen.getOriginalFilename());
+            log.info("⏺ Tamaño: {} bytes", imagen.getSize());
+            log.info("⏺ Tipo MIME: {}", imagen.getContentType());
+
+            if (imagen.isEmpty()) {
+                log.error("❌ La imagen viene VACÍA");
+                return PlacaResponse.error("La imagen está vacía");
+            }
+
+            // Guardar imagen temporalmente
+            File temp = File.createTempFile("placa_", ".jpg");
+            log.info("📁 Archivo temporal creado: {}", temp.getAbsolutePath());
+
+            imagen.transferTo(temp);
+
+            log.info("📸 Imagen escrita correctamente. Tamaño final: {} bytes", temp.length());
+
+            // Ejecutar OpenALPR
+            String json = detectPlate(temp.getAbsolutePath());
+
+            log.info("📥 Resultado JSON bruto de OpenALPR:");
+            log.info(json);
+
+            PlacaResponse response = new PlacaResponse();
+            response.setPlaca(json);
+            response.setExito(true);
+
+            boolean deleted = temp.delete();
+            log.info("🧹 ¿Archivo temporal borrado?: {}", deleted);
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("❌ ERROR EN detectarPlate(MultipartFile): {}", e.getMessage());
+            log.error("❌ STACKTRACE COMPLETO", e);
+            return PlacaResponse.error("Error procesando la imagen: " + e.getMessage());
+        }
+    }
+
+    /** → Método que ejecuta OpenALPR */
+    public String detectPlate(String imagePath) {
+        log.info("🚀 Iniciando detectPlate con ruta: {}", imagePath);
+
+        try {
+            File img = new File(imagePath);
+            log.info("📁 Verificando archivo...");
+            log.info("    → Existe: {}", img.exists());
+            log.info("    → Tamaño: {} bytes", img.length());
+
+            if (!img.exists()) {
+                throw new RuntimeException("La imagen no existe: " + imagePath);
+            }
+
+            ProcessBuilder pb = buildCommand(imagePath);
+            pb.redirectErrorStream(true);
+
+            log.info("🔧 Ejecutando comando OpenALPR...");
+            log.info("🔧 Comando literal: {}", String.join(" ", pb.command()));
+
+            Process process = pb.start();
+
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), "UTF-8")
+            );
+
+            log.info("📥 Leyendo salida de OpenALPR...");
+
+            StringBuilder jsonBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                log.info("🔹 ALPR OUTPUT → {}", line);
+                jsonBuilder.append(line);
+            }
+
+            int exit = process.waitFor();
+            log.info("🏁 Proceso OpenALPR finalizado con código: {}", exit);
+
+            String json = jsonBuilder.toString();
+
+            if (json.isEmpty()) {
+                log.warn("⚠ JSON recibido VACÍO desde OpenALPR");
+            } else {
+                log.info("📦 JSON COMPLETO RECIBIDO: {}", json);
+            }
+
+            return parsePlate(json);
+
+        } catch (Exception e) {
+            log.error("❌ ERROR ejecutando OpenALPR: {}", e.getMessage());
+            log.error("❌ STACKTRACE COMPLETO", e);
+            throw new RuntimeException("Error ejecutando OpenALPR", e);
+        }
+    }
+
+    private String parsePlate(String json) {
+        try {
+            log.info("🔍 Iniciando parseo de JSON...");
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(json);
+
+            log.info("🔍 Nodo principal leído correctamente.");
+
+            JsonNode results = root.path("results");
+
+            log.info("🔍 Tamaño del array de resultados: {}", results.size());
+
+            if (results.isArray() && results.size() > 0) {
+                JsonNode first = results.get(0);
+
+                if (first.has("plate")) {
+                    String plate = first.get("plate").asText();
+                    log.info("💡 PLACA DETECTADA: {}", plate);
+                    return plate;
+                } else {
+                    log.warn("⚠ 'plate' no encontrado en resultado[0]");
+                }
+            } else {
+                log.warn("⚠ No se encontraron resultados en el JSON.");
+            }
+
+            return null;
+
+        } catch (Exception e) {
+            log.error("❌ Error parseando JSON: {}", e.getMessage());
+            log.error("❌ JSON RECIBIDO: {}", json);
+            log.error("❌ STACKTRACE COMPLETO", e);
+
+            throw new RuntimeException("Error parseando respuesta de OpenALPR: " + e.getMessage());
+        }
+    }
+
+    private ProcessBuilder buildCommand(String imagePath) {
+
+        log.info("🟨 Sistema operativo detectado: {}", System.getProperty("os.name"));
+        log.info("🟨 alprPath configurado: {}", alprPath);
+
+        ProcessBuilder pb = new ProcessBuilder(
+                alprPath,
+                "-c", "us",
+                "-j",
+                imagePath
+        );
+
+        File baseDir = new File(alprPath).getParentFile();
+        pb.directory(baseDir);
+
+        log.info("🟩 Directorio de ejecución final: {}", baseDir.getAbsolutePath());
+        log.info("🟩 Comando final: {}", String.join(" ", pb.command()));
+
+        return pb;
+    }
+}
