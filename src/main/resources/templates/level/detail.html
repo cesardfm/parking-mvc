@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html
+  lang="es"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  th:replace="~{layout/dashboard :: layout(
+          pageTitle='Detalles del Nivel',
+          activeMenu='levels',
+          contentTemplate=~{::content}
+      )}"
+>
+  <head>
+    <title>Detalles del Nivel</title>
+  </head>
+  <body>
+    <div th:fragment="content">
+      <!-- Información del Nivel -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6">
+        <div class="px-6 py-5 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">
+                Detalles del Nivel
+              </h1>
+              <p class="text-sm text-gray-500 mt-1">
+                ID: <span th:text="${level.id}">1</span> | Parqueadero:
+                <span th:text="${level.parking.name}">Nombre</span>
+              </p>
+            </div>
+            <div class="flex gap-2">
+              <a
+                th:href="@{/parking/{id}(id=${level.parking.id})}"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+              >
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+                Volver al Parqueadero
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="px-6 py-5">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Filas -->
+            <div
+              class="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-4 border border-primary-200"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center"
+                >
+                  <svg
+                    class="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-xs text-primary-600 font-medium">Filas</p>
+                  <p
+                    class="text-2xl font-bold text-primary-900"
+                    th:text="${level.rows}"
+                  >
+                    5
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Columnas -->
+            <div
+              class="bg-gradient-to-br from-accent-50 to-accent-100 rounded-xl p-4 border border-accent-200"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-12 h-12 bg-accent-500 rounded-lg flex items-center justify-center"
+                >
+                  <svg
+                    class="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 4H5a2 2 0 00-2 2v14a2 2 0 002 2h4"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-xs text-accent-600 font-medium">Columnas</p>
+                  <p
+                    class="text-2xl font-bold text-accent-900"
+                    th:text="${level.columns}"
+                  >
+                    10
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Total Espacios -->
+            <div
+              class="bg-gradient-to-br from-success-50 to-success-100 rounded-xl p-4 border border-success-200"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-12 h-12 bg-success-500 rounded-lg flex items-center justify-center"
+                >
+                  <svg
+                    class="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-xs text-success-600 font-medium">
+                    Total Espacios
+                  </p>
+                  <p
+                    class="text-2xl font-bold text-success-900"
+                    th:text="${level.rows * level.columns}"
+                  >
+                    50
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Disponibles -->
+            <div
+              class="bg-gradient-to-br from-warning-50 to-warning-100 rounded-xl p-4 border border-warning-200"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-12 h-12 bg-warning-500 rounded-lg flex items-center justify-center"
+                >
+                  <svg
+                    class="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-xs text-warning-600 font-medium">
+                    Disponibles
+                  </p>
+                  <p
+                    class="text-2xl font-bold text-warning-900"
+                    id="availableCount"
+                  >
+                    0
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leyenda de Estados -->
+      <div
+        class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-gray-900">Leyenda de Estados</h2>
+          <button
+            onclick="toggleEditMode()"
+            id="editModeBtn"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors font-medium"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+            Activar Modo Edición
+          </button>
+        </div>
+        <!-- <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="w-8 h-8 bg-success-500 rounded border-2 border-success-600"></div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">Disponible</p>
+                        <p class="text-xs text-gray-500">available</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="w-8 h-8 bg-danger-500 rounded border-2 border-danger-600"></div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">Ocupado</p>
+                        <p class="text-xs text-gray-500">occupied</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="w-8 h-8 bg-warning-500 rounded border-2 border-warning-600"></div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">Reservado</p>
+                        <p class="text-xs text-gray-500">reserved</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="w-8 h-8 bg-gray-400 rounded border-2 border-gray-500"></div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">Mantenimiento</p>
+                        <p class="text-xs text-gray-500">maintenance</p>
+                    </div>
+                </div>
+            </div> -->
+      </div>
+
+      <!-- Grilla de Espacios -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Mapa de Espacios</h2>
+
+        <!-- Mensaje de modo edición -->
+        <div
+          id="editModeMessage"
+          class="hidden mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4"
+        >
+          <div class="flex items-start gap-3">
+            <svg
+              class="w-5 h-5 text-blue-500 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-blue-900">
+                Modo Edición Activado
+              </p>
+              <p class="text-sm text-blue-700 mt-1">
+                Haz clic en los espacios para seleccionarlos o arrastra para
+                seleccionar múltiples
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel de selección múltiple -->
+        <div
+          id="selectionPanel"
+          class="hidden mb-4 bg-purple-50 border border-purple-200 rounded-lg p-4"
+        >
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-3">
+              <svg
+                class="w-5 h-5 text-purple-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                />
+              </svg>
+              <div>
+                <p class="text-sm font-medium text-purple-900">
+                  <span id="selectedCount">0</span> sitios seleccionados
+                </p>
+                <p class="text-xs text-purple-700">
+                  Elige un estado para aplicar a todos
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button
+                onclick="applyStatusToSelected('available')"
+                class="px-4 py-2 bg-success-500 hover:bg-success-600 text-white rounded-lg transition-colors text-sm font-medium"
+              >
+                ✓ Disponible
+              </button>
+              <!-- <button onclick="applyStatusToSelected('occupied')" 
+                                class="px-4 py-2 bg-danger-500 hover:bg-danger-600 text-white rounded-lg transition-colors text-sm font-medium">
+                            ✕ Ocupado
+                        </button>
+                        <button onclick="applyStatusToSelected('reserved')" 
+                                class="px-4 py-2 bg-warning-500 hover:bg-warning-600 text-white rounded-lg transition-colors text-sm font-medium">
+                            ⚠ Reservado
+                        </button> -->
+              <button
+                onclick="applyStatusToSelected('disabled')"
+                class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm font-medium"
+              >
+                ⚙ Deshabilitado
+              </button>
+              <button
+                onclick="cancelSelection()"
+                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors text-sm font-medium"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grilla -->
+        <div class="overflow-x-auto overflow-y-hidden">
+          <div class="flex justify-center p-2">
+            <div
+              class="grid gap-2"
+              th:style="'grid-template-columns: repeat(' + ${level.columns} + ', minmax(40px, 50px));'"
+            >
+              <!-- Iterar por filas y columnas -->
+              <div th:each="site : ${sites}">
+                <div
+                  th:attr="data-site-id=${site.id}, 
+                             data-status=${site.status},
+                             data-row=${site.posY},
+                             data-col=${site.posX}"
+                  class="site-box aspect-square rounded-lg border-2 flex flex-col items-center justify-center cursor-pointer transition-all hover:scale-105 select-none"
+                  th:classappend="${site.status == 'available' ? 'bg-success-500 border-success-600 hover:bg-success-600' :
+     'bg-gray-400 border-gray-500 hover:bg-gray-500'}"
+                  onclick="toggleSiteStatus(this)"
+                  onmouseenter="if(isSelecting) toggleSiteStatus(this)"
+                >
+                  <span
+                    class="text-white text-xs font-bold"
+                    th:text="${site.posY + '-' + site.posX}"
+                    >1-1</span
+                  >
+                  <!-- <span class="text-white text-[8px] opacity-80" 
+                          th:text="${site.status}">available</span> -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          id="actionsPanel"
+          class="hidden mt-6 border-t border-gray-200 pt-6"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-900">
+                <span id="changedCount">0</span> cambios realizados
+              </p>
+              <p class="text-xs text-gray-500">
+                Los cambios se guardarán al hacer clic en "Guardar Cambios"
+              </p>
+            </div>
+            <div class="flex gap-3">
+              <button
+                onclick="cancelChanges()"
+                class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onclick="saveChanges()"
+                class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors shadow-md"
+              >
+                Guardar Cambios
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script th:src="@{/js/level-detail.js}"></script>
+    </div>
+  </body>
+</html>

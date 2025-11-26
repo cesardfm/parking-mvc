@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/dashboard :: layout(
+          pageTitle='Dashboard', 
+          activeMenu='dashboard',
+          contentTemplate=~{::content})}">
+<head>
+    <!-- Esta sección será reemplazada por el layout -->
+</head>
+<body>
+    <!-- Fragment de contenido -->
+    <div th:fragment="content">
+        
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <a sec:authorize="hasAnyRole('OWNER')" href="/parking/nuevo" 
+               class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
+                            Nuevo Parqueadero
+                        </h3>
+                        <p class="text-sm text-gray-600">Crear un nuevo sitio</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="/parking/listar" 
+               class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-success-500 to-success-600 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 group-hover:text-success-600 transition-colors">
+                            Ver Parqueaderos
+                        </h3>
+                        <p class="text-sm text-gray-600">Listar todos</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="/reports" 
+               class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-accent-500 to-accent-600 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 group-hover:text-accent-600 transition-colors">
+                            Reportes
+                        </h3>
+                        <p class="text-sm text-gray-600">Ver estadísticas</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <!-- Recent Parkings -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Parqueaderos</h3>
+                    </div>
+                    <a href="/parking/listar" 
+                       class="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1">
+                        Ver todos
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <!-- Parkings List -->
+                <div th:if="${recentParkings != null and !recentParkings.isEmpty()}" class="space-y-4">
+                    <div th:each="parking, iterStat : ${recentParkings}" 
+                         th:if="${iterStat.index < 5}"
+                         class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                        <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <span class="text-2xl">🅿️</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-gray-900 truncate" th:text="${parking.name}">
+                                Nombre del Parqueadero
+                            </h4>
+                            <p class="text-sm text-gray-600 truncate" th:text="${parking.address}">
+                                Dirección
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm">
+                            <span class="px-3 py-1 bg-success-100 text-success-700 rounded-lg font-medium">
+                                Activo
+                            </span>
+                            <a href="#" class="p-2 hover:bg-white rounded-lg transition-colors">
+                                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Empty State -->
+                <div sec:authorize="hasAnyRole('OWNER')" th:if="${recentParkings == null or recentParkings.isEmpty()}">
+                    <div th:replace="~{fragments/cards :: empty-state(
+                        icon='🅿️', 
+                        title='No hay parqueaderos', 
+                        description='Comienza creando tu primer parqueadero.',
+                        buttonText='Crear Parqueadero',
+                        buttonUrl='/parking/nuevo')}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Activity Chart Placeholder -->
+        <!-- <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Ocupación por Hora</h3>
+                <div class="h-64 flex items-center justify-center bg-gray-50 rounded-xl">
+                    <p class="text-gray-400">📊 Gráfico próximamente</p>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Distribución de Espacios</h3>
+                <div class="h-64 flex items-center justify-center bg-gray-50 rounded-xl">
+                    <p class="text-gray-400">📈 Gráfico próximamente</p>
+                </div>
+            </div>
+        </div> -->
+    </div>
+</body>
+</html>

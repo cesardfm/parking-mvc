@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/dashboard :: layout(
+          pageTitle='Detalles del Nivel - Admin',
+          activeMenu='levels',
+          contentTemplate=~{::content}
+      )}">
+<head>
+    <title>Detalles del Nivel - Admin</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Nivel: <span th:text="${level.id}">Nivel</span></h1>
+                <p class="text-sm text-gray-500">Parqueadero: <span th:text="${level.parking.name}">Parking</span></p>
+            </div>
+            <div>
+                <a th:href="@{/parking/{id}(id=${level.parking.id})}" class="px-4 py-2 bg-gray-100 rounded-lg">Volver al Parqueadero</a>
+            </div>
+        </div>
+
+        <p class="text-sm text-gray-600 mb-4">Selecciona un espacio para editar su estado y tipo de vehículo. Los espacios con estado "deshabilitado" no se pueden modificar.</p>
+
+            <div class="flex justify-center p-2">
+                <div class="grid gap-2"  th:style="'grid-template-columns: repeat(' + ${level.columns} + ', minmax(40px, 50px));'">
+                    <div th:each="site : ${sites}">
+                        <div th:attr="data-site-id=${site.id}, data-status=${site.status}, data-row=${site.posY}, data-col=${site.posX}"
+                             class="site-box aspect-square rounded-lg border-2 flex items-center justify-center cursor-pointer transition-all select-none"
+                             th:classappend="${site.status == 'available' ? 'bg-success-500 border-success-600' : site.status == 'occupied' ? 'bg-danger-500 border-danger-600' : site.status == 'reserved' ? 'bg-warning-500 border-warning-600' : 'bg-gray-400 border-gray-500'}"
+                             >
+                            <span class="text-white text-xs font-bold" th:text="${site.posY + '-' + site.posX}">1-1</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Panel lateral para editar un sitio -->
+        <div id="adminPanel" class="fixed right-6 top-24 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 hidden z-50">
+            <h3 class="text-lg font-semibold mb-3">Editar Sitio</h3>
+            <p class="text-sm text-gray-600 mb-2">ID: <span id="panelSiteId"></span></p>
+            <p class="text-sm text-gray-600 mb-4">Pos: <span id="panelSitePos"></span></p>
+
+            <div class="mb-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de vehículo</label>
+                <select id="panelVehicleType" class="w-full border rounded px-3 py-2">
+                    <option value="none">-- Ninguno --</option>
+                    <option value="car">Coche</option>
+                    <option value="moto">Moto</option>
+                    <option value="truck">Camión</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                <div class="flex gap-2">
+                    <label class="inline-flex items-center"><input type="radio" name="panelStatus" value="available" class="mr-2">Disponible</label>
+                    <label class="inline-flex items-center"><input type="radio" name="panelStatus" value="reserved" class="mr-2">Reservado</label>
+                    <label class="inline-flex items-center"><input type="radio" name="panelStatus" value="occupied" class="mr-2">Ocupado</label>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mt-4">
+                <button id="panelSave" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded">Guardar</button>
+                <button id="panelCancel" class="px-3 py-2 bg-gray-200 rounded">Cancelar</button>
+            </div>
+        </div>
+
+    </div>
+    <script th:src="@{/js/level-detail-admin.js}"></script>
+</div>
+</body>
+</html>
