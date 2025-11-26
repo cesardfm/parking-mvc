@@ -136,8 +136,9 @@ public class Parking {
         this.admins.add(user);
     }
     
-    public void removeAdmin(User user) {
-        this.admins.remove(user);
+    public void removeAdmin(User admin) {
+
+        boolean removed = this.admins.removeIf(a -> a.getId().equals(admin.getId()));
     }
     
     public boolean hasAdmin(User user) {

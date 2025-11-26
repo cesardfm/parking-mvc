@@ -1,28 +1,15 @@
 package com.g3.parking.controller.web;
 
-import com.g3.parking.model.User;
-import com.g3.parking.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import com.g3.parking.datatransfer.UserDTO;
+
 @Controller
 @RequestMapping("/users")
-public class UserController {
-    
-    @Autowired
-    private UserService userService;
-
-    @ModelAttribute("currentUser")
-    public User getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null)
-            return null;
-        return userService.findByUsername(userDetails.getUsername());
-    }
+public class UserController extends BaseController {
     
     // Mostrar formulario para crear usuario
     @PreAuthorize("hasRole('OWNER')")
@@ -38,7 +25,7 @@ public class UserController {
             @RequestParam("newusername") String username,
             @RequestParam("newpassword") String password,
             @RequestParam("role") String roleName, 
-            @ModelAttribute("currentUser") User currentUser,
+            @ModelAttribute("currentUser") UserDTO currentUser,
             Model model) {
         
         try {
@@ -81,8 +68,16 @@ public class UserController {
     // Listar usuarios de la organización
     @PreAuthorize("hasRole('OWNER')")
     @GetMapping("/list")
-    public String listarUsuarios(Model model, @ModelAttribute("currentUser") User currentUser) {
+    public String listarUsuarios(Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
         model.addAttribute("users", userService.findByOrganization(currentUser.getOrganization().getId()));
         return "user/list";
+    }
+
+    @GetMapping("/detail/{id}")
+    public String detail(@PathVariable Long id,
+            Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
+
+        model.addAttribute("user", userService.findById(id));
+        return "user/detail";
     }
 }

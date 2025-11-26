@@ -23,7 +23,7 @@ public class User {
 
     // Un usuario pertenece a UNA organización
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id", nullable = false)
+    @JoinColumn(name = "organization_id", nullable = true)
     private Organization organization;
 
     // Un usuario tiene múltiples roles
@@ -34,6 +34,9 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+
+    //@OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = {})
+    //private Set<Vehicle> vehicles = new HashSet<>();
     
     private Boolean active = true;
     

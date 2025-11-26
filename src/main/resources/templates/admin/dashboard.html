@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/dashboard :: layout(
+          pageTitle='Dashboard', 
+          activeMenu='dashboard',
+          contentTemplate=~{::content})}">
+<head>
+    <!-- Esta sección será reemplazada por el layout -->
+</head>
+<body>
+    <!-- Fragment de contenido -->
+    <div th:fragment="content">
+        
+        
+        
+        <!-- Recent Parkings -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Parqueaderos</h3>
+                    </div>
+                    <a href="/parking/adminlist" 
+                       class="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1">
+                        Ver todos
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        
+    </div>
+</body>
+</html>
