@@ -4,7 +4,7 @@
   xmlns:th="http://www.thymeleaf.org"
   xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
   th:replace="~{layout/dashboard :: layout(
-          pageTitle='Nuevo Tiquete', 
+          pageTitle='Nueva Reserva', 
           activeMenu='tickets',
           contentTemplate=~{::content})}"
 >
@@ -37,35 +37,49 @@
               </svg>
             </a>
             <div>
-              <h1 class="text-2xl font-bold text-gray-900">Crear Nuevo Tiquete</h1>
+              <h1 class="text-2xl font-bold text-gray-900">
+                Crear Nuevo Tiquete
+              </h1>
               <p class="text-gray-600 mt-1">
-                Ingresa la información básica del tiquete
+                Ingresa la información básica de la reserva
               </p>
             </div>
           </div>
         </div>
 
         <!-- Form Card -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+        >
           <form th:action="@{/tickets/crear}" method="post" class="p-8">
-            
             <!-- Error Alert -->
             <div th:if="${error}" class="mb-6">
-              <div th:replace="~{fragments/cards :: alert(type='error', message=${error})}"></div>
+              <div
+                th:replace="~{fragments/cards :: alert(type='error', message=${error})}"
+              ></div>
             </div>
 
             <!-- Success Alert -->
             <div th:if="${mensaje}" class="mb-6">
-              <div th:replace="~{fragments/cards :: alert(type='success', message=${mensaje})}"></div>
+              <div
+                th:replace="~{fragments/cards :: alert(type='success', message=${mensaje})}"
+              ></div>
             </div>
 
             <!-- Form Fields -->
             <div class="space-y-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
+              <div
+                class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-xl border border-gray-200"
+              >
                 <div>
-                  <label for="licensePlate" class="block text-sm font-semibold text-gray-700 mb-2">
+                  <label
+                    for="licensePlate"
+                    class="block text-sm font-semibold text-gray-700 mb-2"
+                  >
                     Placa *
                   </label>
+                  <input type="file" id="image" name="image" accept="image/*" />
+                  <img id="preview" width="200" />
                   <input
                     type="text"
                     id="licensePlate"
@@ -77,7 +91,10 @@
                 </div>
 
                 <div>
-                  <label for="color" class="block text-sm font-semibold text-gray-700 mb-2">
+                  <label
+                    for="color"
+                    class="block text-sm font-semibold text-gray-700 mb-2"
+                  >
                     Color *
                   </label>
                   <input
@@ -91,7 +108,10 @@
                 </div>
 
                 <div>
-                  <label for="categoryId" class="block text-sm font-semibold text-gray-700 mb-2">
+                  <label
+                    for="categoryId"
+                    class="block text-sm font-semibold text-gray-700 mb-2"
+                  >
                     Categoría *
                   </label>
                   <select
@@ -111,7 +131,10 @@
               </div>
 
               <div>
-                <label for="entryTime" class="block text-sm font-semibold text-gray-700 mb-2">
+                <label
+                  for="entryTime"
+                  class="block text-sm font-semibold text-gray-700 mb-2"
+                >
                   Hora de Entrada
                 </label>
                 <input
@@ -131,7 +154,12 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                   Parqueadero
                 </label>
-                <input type="hidden" id="parkingId" name="parkingId" th:value="${parking.id}" />
+                <input
+                  type="hidden"
+                  id="parkingId"
+                  name="parkingId"
+                  th:value="${parking.id}"
+                />
                 <input
                   type="text"
                   readonly
@@ -141,7 +169,9 @@
               </div>
 
               <!-- Sección de Niveles -->
-              <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
+              <div
+                class="bg-white rounded-2xl shadow-sm border border-gray-200"
+              >
                 <div class="px-6 py-5 border-b border-gray-200">
                   <div class="flex items-center justify-between">
                     <div>
@@ -150,7 +180,11 @@
                       </h2>
                       <p class="text-sm text-gray-500 mt-1">
                         Total:
-                        <span class="font-semibold" th:text="${#lists.size(levels)}">0</span>
+                        <span
+                          class="font-semibold"
+                          th:text="${#lists.size(levels)}"
+                          >0</span
+                        >
                         niveles disponibles
                       </p>
                     </div>
@@ -196,18 +230,36 @@
                   </p>
                 </div>
 
-                <input type="hidden" id="siteId" name="siteId" value="" required />
+                <input
+                  type="hidden"
+                  id="siteId"
+                  name="siteId"
+                  value=""
+                  required
+                />
               </div>
             </div>
 
             <!-- Form Actions -->
-            <div class="flex items-center gap-3 mt-8 pt-6 border-t border-gray-200">
+            <div
+              class="flex items-center gap-3 mt-8 pt-6 border-t border-gray-200"
+            >
               <button
                 type="submit"
                 class="flex-1 sm:flex-initial bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold px-8 py-3 rounded-xl transition-all transform hover:scale-105 shadow-md flex items-center justify-center gap-2"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span>Generar Tiquete</span>
               </button>
@@ -224,7 +276,7 @@
       </div>
 
       <!-- DATOS OCULTOS PARA JAVASCRIPT -->
-      <div style="display: none;" id="sitesDataContainer">
+      <div style="display: none" id="sitesDataContainer">
         <div
           th:each="level : ${levels}"
           th:attr="data-level-id=${level.id},
@@ -237,20 +289,26 @@
 
       <!-- SCRIPT INLINE COMPLETO -->
       <script th:inline="javascript">
+        document
+          .getElementById("image")
+          .addEventListener("change", function (event) {
+            const file = event.target.files[0];
+            document.getElementById("preview").src = URL.createObjectURL(file);
+          });
         /*<![CDATA[*/
-        console.log('=== SCRIPT INICIADO ===');
-        
+        console.log("=== SCRIPT INICIADO ===");
+
         // Primero, verificar que los datos existen en el HTML
-        (function() {
-          const elements = document.querySelectorAll('[data-level-sites]');
-          console.log('Elementos encontrados:', elements.length);
-          
+        (function () {
+          const elements = document.querySelectorAll("[data-level-sites]");
+          console.log("Elementos encontrados:", elements.length);
+
           elements.forEach((el, idx) => {
-            console.log('Elemento', idx, ':', {
-              levelId: el.getAttribute('data-level-id'),
-              rows: el.getAttribute('data-rows'),
-              columns: el.getAttribute('data-columns'),
-              sitesLength: el.getAttribute('data-sites')?.length
+            console.log("Elemento", idx, ":", {
+              levelId: el.getAttribute("data-level-id"),
+              rows: el.getAttribute("data-rows"),
+              columns: el.getAttribute("data-columns"),
+              sitesLength: el.getAttribute("data-sites")?.length,
             });
           });
         })();
@@ -261,18 +319,18 @@
 
         // Cargar datos
         function loadSitesData() {
-          const elements = document.querySelectorAll('[data-level-sites]');
-          
-          elements.forEach(el => {
-            const levelId = el.getAttribute('data-level-id');
-            const sitesJson = el.getAttribute('data-sites');
-            const rows = parseInt(el.getAttribute('data-rows'));
-            const columns = parseInt(el.getAttribute('data-columns'));
-            
+          const elements = document.querySelectorAll("[data-level-sites]");
+
+          elements.forEach((el) => {
+            const levelId = el.getAttribute("data-level-id");
+            const sitesJson = el.getAttribute("data-sites");
+            const rows = parseInt(el.getAttribute("data-rows"));
+            const columns = parseInt(el.getAttribute("data-columns"));
+
             try {
               const sites = JSON.parse(sitesJson);
               sitesData[levelId] = { sites, rows, columns };
-              console.log(`Nivel ${levelId} cargado:`, sites.length, 'sitios');
+              console.log(`Nivel ${levelId} cargado:`, sites.length, "sitios");
             } catch (e) {
               console.error(`Error en nivel ${levelId}:`, e);
             }
@@ -281,30 +339,48 @@
 
         // Renderizar grilla
         function renderGrid(sites, rows, columns) {
-          console.log('Renderizando grilla:', rows, 'x', columns, '=', sites.length, 'sitios');
-          
-          const grid = document.getElementById('sitesGrid');
+          console.log(
+            "Renderizando grilla:",
+            rows,
+            "x",
+            columns,
+            "=",
+            sites.length,
+            "sitios"
+          );
+
+          const grid = document.getElementById("sitesGrid");
           grid.style.gridTemplateColumns = `repeat(${columns}, minmax(60px, 80px))`;
-          grid.className = 'grid gap-3 mb-4 justify-center';
-          
+          grid.className = "grid gap-3 mb-4 justify-center";
+
           // Crear mapa de sitios
           const sitesMap = {};
-          sites.forEach(site => {
+          sites.forEach((site) => {
             const key = `${site.posY}-${site.posX}`;
             sitesMap[key] = site;
-            console.log('Sitio mapeado:', key, '-> ID:', site.id, 'Status:', site.status);
+            console.log(
+              "Sitio mapeado:",
+              key,
+              "-> ID:",
+              site.id,
+              "Status:",
+              site.status
+            );
           });
-          
+
           // Detectar si las posiciones empiezan desde 0 o desde 1
-          const startsFromOne = sites.some(s => s.posX === 1 || s.posY === 1);
+          const startsFromOne = sites.some((s) => s.posX === 1 || s.posY === 1);
           const startRow = startsFromOne ? 1 : 0;
           const startCol = startsFromOne ? 1 : 0;
-          
-          console.log('🔢 Posiciones empiezan desde:', startsFromOne ? '1' : '0');
-          
-          let html = '';
+
+          console.log(
+            "🔢 Posiciones empiezan desde:",
+            startsFromOne ? "1" : "0"
+          );
+
+          let html = "";
           let availableCount = 0;
-          
+
           for (let row = 0; row < rows; row++) {
             for (let col = 0; col < columns; col++) {
               // Ajustar índices según si empiezan desde 0 o 1
@@ -312,127 +388,153 @@
               const actualCol = col + startCol;
               const key = `${actualRow}-${actualCol}`;
               const site = sitesMap[key];
-              
+
               if (site) {
-                const isAvailable = site.status === 'available';
+                const isAvailable = site.status === "available";
                 if (isAvailable) availableCount++;
-                
-                const bgColor = isAvailable 
-                  ? 'bg-green-500 border-green-600 hover:bg-green-600' 
-                  : 'bg-gray-400 border-gray-500';
-                
+
+                const bgColor = isAvailable
+                  ? "bg-green-500 border-green-600 hover:bg-green-600"
+                  : "bg-gray-400 border-gray-500";
+
                 html += `
                   <div 
-                    class="${bgColor} aspect-square rounded-lg border-2 flex flex-col items-center justify-center transition-all ${isAvailable ? 'cursor-pointer hover:scale-105' : 'cursor-not-allowed'} select-none"
-                    ${isAvailable ? `onclick="selectSite(${site.id}, '${actualRow}-${actualCol}')"` : ''}
+                    class="${bgColor} aspect-square rounded-lg border-2 flex flex-col items-center justify-center transition-all ${
+                  isAvailable
+                    ? "cursor-pointer hover:scale-105"
+                    : "cursor-not-allowed"
+                } select-none"
+                    ${
+                      isAvailable
+                        ? `onclick="selectSite(${site.id}, '${actualRow}-${actualCol}')"`
+                        : ""
+                    }
                     data-site-id="${site.id}"
                     data-status="${site.status}"
                   >
                     <span class="text-white text-sm font-bold">${actualRow}-${actualCol}</span>
-                    ${!isAvailable ? '<span class="text-white text-[10px] opacity-80">Ocupado</span>' : ''}
+                    ${
+                      !isAvailable
+                        ? '<span class="text-white text-[10px] opacity-80">Ocupado</span>'
+                        : ""
+                    }
                   </div>
                 `;
               } else {
-                console.warn('⚠️ No se encontró sitio en posición:', key);
+                console.warn("⚠️ No se encontró sitio en posición:", key);
               }
             }
           }
-          
+
           grid.innerHTML = html;
-          console.log('✅ Grilla renderizada con', availableCount, 'sitios disponibles de', sites.length, 'totales');
+          console.log(
+            "✅ Grilla renderizada con",
+            availableCount,
+            "sitios disponibles de",
+            sites.length,
+            "totales"
+          );
         }
 
         // Seleccionar sitio
         function selectSite(siteId, siteNumber) {
-          console.log('✅ Sitio seleccionado:', siteId, 'Posición:', siteNumber);
-          
+          console.log(
+            "✅ Sitio seleccionado:",
+            siteId,
+            "Posición:",
+            siteNumber
+          );
+
           // Remover selección previa
-          document.querySelectorAll('[data-site-id]').forEach(el => {
-            el.classList.remove('ring-4', 'ring-blue-500', 'scale-110');
+          document.querySelectorAll("[data-site-id]").forEach((el) => {
+            el.classList.remove("ring-4", "ring-blue-500", "scale-110");
           });
-          
+
           // Seleccionar nuevo sitio
           const siteEl = document.querySelector(`[data-site-id="${siteId}"]`);
           if (siteEl) {
-            siteEl.classList.add('ring-4', 'ring-blue-500', 'scale-110');
+            siteEl.classList.add("ring-4", "ring-blue-500", "scale-110");
           }
-          
+
           // Actualizar input hidden
-          document.getElementById('siteId').value = siteId;
-          console.log('Input siteId actualizado a:', siteId);
-          
+          document.getElementById("siteId").value = siteId;
+          console.log("Input siteId actualizado a:", siteId);
+
           // Mostrar confirmación
-          document.getElementById('selectedSiteNumber').textContent = siteNumber;
-          document.getElementById('selectedSiteInfo').classList.remove('hidden');
-          
+          document.getElementById("selectedSiteNumber").textContent =
+            siteNumber;
+          document
+            .getElementById("selectedSiteInfo")
+            .classList.remove("hidden");
+
           // Scroll suave
-          document.getElementById('selectedSiteInfo').scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'nearest' 
+          document.getElementById("selectedSiteInfo").scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
           });
         }
 
         // Manejar cambio de nivel
         function handleLevelChange(e) {
           const levelId = e.target.value;
-          console.log('🔄 Nivel seleccionado:', levelId);
-          
-          const container = document.getElementById('sitesContainer');
-          const siteIdInput = document.getElementById('siteId');
-          const selectedInfo = document.getElementById('selectedSiteInfo');
-          
+          console.log("🔄 Nivel seleccionado:", levelId);
+
+          const container = document.getElementById("sitesContainer");
+          const siteIdInput = document.getElementById("siteId");
+          const selectedInfo = document.getElementById("selectedSiteInfo");
+
           // Limpiar selección previa
-          siteIdInput.value = '';
-          selectedInfo.classList.add('hidden');
-          
+          siteIdInput.value = "";
+          selectedInfo.classList.add("hidden");
+
           if (!levelId) {
-            console.log('⚠️ No hay nivel seleccionado, ocultando contenedor');
-            container.classList.add('hidden');
+            console.log("⚠️ No hay nivel seleccionado, ocultando contenedor");
+            container.classList.add("hidden");
             return;
           }
-          
+
           const data = sitesData[levelId];
-          console.log('📊 Datos del nivel:', data);
-          
+          console.log("📊 Datos del nivel:", data);
+
           if (data) {
-            console.log('✅ Renderizando grilla para nivel', levelId);
+            console.log("✅ Renderizando grilla para nivel", levelId);
             renderGrid(data.sites, data.rows, data.columns);
-            container.classList.remove('hidden');
+            container.classList.remove("hidden");
           } else {
-            console.error('❌ No se encontraron datos para el nivel:', levelId);
-            container.classList.add('hidden');
+            console.error("❌ No se encontraron datos para el nivel:", levelId);
+            container.classList.add("hidden");
           }
         }
 
         // Inicializar
-        document.addEventListener('DOMContentLoaded', function() {
-          console.log('DOM Cargado');
-          
+        document.addEventListener("DOMContentLoaded", function () {
+          console.log("DOM Cargado");
+
           loadSitesData();
-          
-          const select = document.getElementById('levelSelect');
+
+          const select = document.getElementById("levelSelect");
           if (select) {
-            select.addEventListener('change', handleLevelChange);
-            console.log('Event listener agregado');
+            select.addEventListener("change", handleLevelChange);
+            console.log("Event listener agregado");
           }
-          
+
           // Validación simple del formulario
-          const form = document.querySelector('form');
+          const form = document.querySelector("form");
           if (form) {
-            form.addEventListener('submit', function(e) {
-              const siteId = document.getElementById('siteId').value;
-              const levelId = document.getElementById('levelSelect').value;
-              
+            form.addEventListener("submit", function (e) {
+              const siteId = document.getElementById("siteId").value;
+              const levelId = document.getElementById("levelSelect").value;
+
               // Si se seleccionó un nivel pero no un sitio, bloquear envío
               if (levelId && !siteId) {
                 e.preventDefault();
-                alert('Por favor, selecciona un sitio antes de continuar.');
+                alert("Por favor, selecciona un sitio antes de continuar.");
                 return false;
               }
             });
           }
         });
-        
+
         // ELIMINAR: función updateSubmitButton ya no es necesaria
         /*]]>*/
       </script>

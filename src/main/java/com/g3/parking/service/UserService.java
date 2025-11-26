@@ -9,6 +9,7 @@ import com.g3.parking.datatransfer.UserDTO;
 import com.g3.parking.model.Organization;
 import com.g3.parking.model.Role;
 import com.g3.parking.model.User;
+import com.g3.parking.repository.OrganizationRepository;
 import com.g3.parking.repository.RoleRepository;
 import com.g3.parking.repository.UserRepository;
 

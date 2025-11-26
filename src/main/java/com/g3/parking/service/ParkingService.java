@@ -6,7 +6,6 @@ import com.g3.parking.model.Organization;
 import com.g3.parking.model.Parking;
 import com.g3.parking.model.User;
 import com.g3.parking.repository.ParkingRepository;
-import com.g3.parking.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,9 +23,6 @@ public class ParkingService extends BaseService {
     @Autowired
     private UserService userService;
 
-    @Autowired 
-    private UserRepository userRepository;
-
     public List<ParkingDTO> findAll() {
         List<Parking> parkings = parkingRepository.findAll();
         return parkings.stream()
@@ -40,8 +36,7 @@ public class ParkingService extends BaseService {
 
     // Buscar parking y validar que pertenece a la organización del usuario
     public ParkingDTO findByIdAndValidateOrganization(Long parkingId, UserDTO currentUserDTO) {
-        Parking parking = parkingRepository.findById(parkingId)
-                .orElseThrow(() -> new RuntimeException("Parqueadero no encontrado"));
+        Parking parking = parkingRepository.findById(parkingId);
 
         User currentUser = convert(currentUserDTO, User.class);
 

@@ -3,6 +3,7 @@ package com.g3.parking.controller.web;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 // import org.hibernate.validator.internal.util.logging.Log_.logger;
@@ -12,18 +13,19 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.g3.parking.datatransfer.LevelDTO;
 import com.g3.parking.datatransfer.ParkingDTO;
-import com.g3.parking.datatransfer.RoleDTO;
 import com.g3.parking.datatransfer.TicketDTO;
 import com.g3.parking.datatransfer.UserDTO;
 import com.g3.parking.datatransfer.VehicleDTO;
 import com.g3.parking.request.InvoiceRequest;
+import com.g3.parking.service.ImageProcessingService;
 import com.g3.parking.service.InvoiceService;
 import com.g3.parking.service.LevelService;
 import com.g3.parking.service.ParkingService;
-import com.g3.parking.service.RoleService;
+import com.g3.parking.service.PlacaService;
 import com.g3.parking.service.SendEmail;
 import com.g3.parking.service.SiteService;
 import com.g3.parking.service.TicketService;
@@ -53,9 +55,6 @@ public class TicketController extends BaseController {
     private LevelService levelService;
 
     @Autowired
-    private RoleService roleService;
-
-    @Autowired
     private SiteService siteService;
 
     @Autowired
@@ -63,6 +62,9 @@ public class TicketController extends BaseController {
 
     @Autowired
     private InvoiceService invoiceService;
+
+    @Autowired
+    private ImageProcessingService imageProcessingService;
 
     // Listar todos los parkings
     @PreAuthorize("hasAnyRole('OWNER','ADMIN','USER')")
@@ -223,11 +225,17 @@ public class TicketController extends BaseController {
             @RequestParam("color") String color,
             @RequestParam("categoryId") Long categoryId,
             @RequestParam("entryTime") String entryTime,
+            @RequestParam("image") MultipartFile image,
             @ModelAttribute("currentUser") UserDTO currentUser,
             Model model) {
         try {
+
+            byte[] bytes = image.getBytes();
+            String imageBase64 = Base64.getEncoder().encodeToString(bytes);
+
+            String placa = procesarImagen(imageBase64);
             VehicleDTO vehicle = VehicleDTO.builder()
-                    .licensePlate(licensePlate)
+                    .licensePlate(placa != null ? placa : licensePlate)
                     .color(color)
                     .category(vehicleCategoryService.findById(categoryId))
                     .build();

@@ -1,12 +1,5 @@
 package com.g3.parking.controller.web;
 
-import com.g3.parking.model.Level;
-import com.g3.parking.model.Parking;
-import com.g3.parking.model.Site;
-import com.g3.parking.model.User;
-import com.g3.parking.repository.LevelRepository;
-import com.g3.parking.repository.ParkingRepository;
-import com.g3.parking.repository.SiteRepository;
 import com.g3.parking.service.UserService;
 import com.g3.parking.datatransfer.LevelDTO;
 import com.g3.parking.datatransfer.ParkingDTO;

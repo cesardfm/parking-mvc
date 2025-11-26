@@ -10,26 +10,84 @@ import org.springframework.data.repository.query.Param;
 import com.g3.parking.model.Ticket;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
-    List<Ticket> findByVehicle_LicensePlate(String licensePlate);
-    Optional<Ticket> findByPaidFalseAndVehicle_LicensePlate(String licensePlate);
-    List<Ticket> findBySite_Id(Long siteId);
-    List<Ticket> findBySite_Level_Parking_Id(Long parkingId);
-    List<Ticket> findBySite_Level_Parking_IdAndVehicle_Owner_Id(Long parkingId, Long ownerId);
-    Optional<Ticket> findById(Long id);
-    
+
+    // Buscar tickets por placa del vehículo
+    @Query(
+        value = "SELECT t.* FROM tickets t " +
+                "JOIN vehicles v ON t.vehicle_id = v.id " +
+                "WHERE v.license_plate = :licensePlate",
+        nativeQuery = true
+    )
+    List<Ticket> findByVehicleLicensePlate(@Param("licensePlate") String licensePlate);
+
+
+    // Ticket sin pagar por placa
+    @Query(
+        value = "SELECT t.* FROM tickets t " +
+                "JOIN vehicles v ON t.vehicle_id = v.id " +
+                "WHERE t.paid = FALSE AND v.license_plate = :licensePlate " +
+                "LIMIT 1",
+        nativeQuery = true
+    )
+    Optional<Ticket> findByPaidFalseAndVehicleLicensePlate(@Param("licensePlate") String licensePlate);
+
+
+    // Tickets por ID de Site
+    @Query(
+        value = "SELECT * FROM tickets WHERE site_id = :siteId",
+        nativeQuery = true
+    )
+    List<Ticket> findBySiteId(@Param("siteId") Long siteId);
+
+
+    // Tickets por parking (a través de site → level → parking)
+    @Query(
+        value = "SELECT t.* FROM tickets t " +
+                "JOIN sites s ON t.site_id = s.id " +
+                "JOIN levels l ON s.level_id = l.id " +
+                "WHERE l.parking_id = :parkingId",
+        nativeQuery = true
+    )
+    List<Ticket> findByParkingId(@Param("parkingId") Long parkingId);
+
+
+    // Tickets por parking y owner del vehículo
+    @Query(
+        value = "SELECT t.* FROM tickets t " +
+                "JOIN vehicles v ON t.vehicle_id = v.id " +
+                "JOIN sites s ON t.site_id = s.id " +
+                "JOIN levels l ON s.level_id = l.id " +
+                "WHERE l.parking_id = :parkingId AND v.owner_id = :ownerId",
+        nativeQuery = true
+    )
+    List<Ticket> findByParkingIdAndOwnerId(
+            @Param("parkingId") Long parkingId,
+            @Param("ownerId") Long ownerId
+    );
+
+
+    // Reemplaza el findById normal
+    @Query(
+        value = "SELECT * FROM tickets WHERE id = :id LIMIT 1",
+        nativeQuery = true
+    )
+    Optional<Ticket> findById(@Param("id") Long id);
+
+
     /**
-     * Carga un ticket con sus relaciones sin que Hibernate intente
-     * reacoplar entidades de User que pudieran estar ya en sesión.
-     * Esto previene el error: "Identifier of an instance of 'User' was altered from X to Y"
+     * Cargar un ticket con todas sus relaciones
+     * usando SQL nativo (equivalente al JPQL con FETCH).
      */
-    @Query("SELECT t FROM Ticket t " +
-           "LEFT JOIN FETCH t.site s " +
-           "LEFT JOIN FETCH s.level l " +
-           "LEFT JOIN FETCH l.parking p " +
-           "LEFT JOIN FETCH p.organization " +
-           "LEFT JOIN FETCH t.vehicle v " +
-           "LEFT JOIN FETCH v.category " +
-           "WHERE t.id = :id")
+    @Query(
+        value = "SELECT t.* FROM tickets t " +
+                "LEFT JOIN sites s ON t.site_id = s.id " +
+                "LEFT JOIN levels l ON s.level_id = l.id " +
+                "LEFT JOIN parkings p ON l.parking_id = p.id " +
+                "LEFT JOIN organizations o ON p.organization_id = o.id " +
+                "LEFT JOIN vehicles v ON t.vehicle_id = v.id " +
+                "LEFT JOIN categories c ON v.category_id = c.id " +
+                "WHERE t.id = :id LIMIT 1",
+        nativeQuery = true
+    )
     Optional<Ticket> findByIdWithRelations(@Param("id") Long id);
 }
-

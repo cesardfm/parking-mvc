@@ -1,0 +1,110 @@
+services:
+  oracle-db:
+    image: gvenzl/oracle-xe:21-slim-faststart
+    platform: linux/amd64
+    container_name: mi-db-oracle
+    environment:
+      - ORACLE_PASSWORD=password
+      - ORACLE_DISABLE_ASYNCH_IO=true
+      - TZ=America/Bogota
+    ports:
+      - "1521:1521"
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD-SHELL", "tnsping localhost:1521/XEPDB1 || exit 1"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+      start_period: 120s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+    mem_limit: 2g
+
+  mysql-db:
+    image: mysql:8.0
+    platform: linux/amd64
+    container_name: mi-db-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=testdb
+      - TZ=America/Bogota
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --innodb-buffer-pool-size=128M
+      - --max-connections=100
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  postgres-db:
+    image: postgres:16-alpine
+    platform: linux/amd64
+    container_name: mi-db-postgres
+    environment:
+      - POSTGRES_DB=parkingdb
+      - POSTGRES_USER=parking
+      - POSTGRES_PASSWORD=parking123
+      - TZ=America/Bogota
+    ports:
+      - "5431:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parking"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  parking-app:
+    container_name: parking-app
+    platform: linux/amd64
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data
+      - ./config/database-config.json:/config/database-config.json:ro
+      - ./config/db_config:/config/db_config:ro
+      - parking_logs:/var/log/parking
+    restart: unless-stopped
+    depends_on:
+      - oracle-db
+      - mysql-db
+      - postgres-db
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 512M
+
+volumes:
+  oracle_data:
+    driver: local
+  mysql_data:
+    driver: local
+  postgres_data:
+    driver: local
+  parking_logs:
+    driver: local

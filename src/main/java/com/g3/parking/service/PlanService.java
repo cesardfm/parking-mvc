@@ -32,7 +32,7 @@ public class PlanService extends BaseService {
 
     public PlanDTO findById(Long id) {
         try {
-            Plan plan = planRepo.getReferenceById(id);
+            Plan plan = planRepo.findById(id);
             return convert(plan, PlanDTO.class);
         } catch (Exception e) {
             return null;
@@ -41,7 +41,7 @@ public class PlanService extends BaseService {
 
     public boolean changeStatus(Long id) {
         try {
-            Plan plan = planRepo.getReferenceById(id);
+            Plan plan = planRepo.findById(id);
             plan.setActive(!plan.getActive());
             planRepo.save(plan);
             return true;
@@ -62,7 +62,7 @@ public class PlanService extends BaseService {
 
     public boolean update(PlanDTO planDTO) {
         try {
-            Plan plan = planRepo.getReferenceById(planDTO.getId());
+            Plan plan = planRepo.findById(planDTO.getId());
             plan.setName(planDTO.getName());
             plan.setDescription(planDTO.getDescription());
             plan.setPrice(planDTO.getPrice());

@@ -1,4 +1,4 @@
-package com.g3.parking.imageprocessing.DTO;
+package com.g3.parking.datatransfer;
 
 public class PlacaResponse {
 

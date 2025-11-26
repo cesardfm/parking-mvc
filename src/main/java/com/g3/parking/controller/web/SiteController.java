@@ -1,7 +1,6 @@
 package com.g3.parking.controller.web;
 
 import com.g3.parking.datatransfer.SiteDTO;
-import com.g3.parking.repository.SiteRepository;
 import com.g3.parking.request.SiteUpdateRequest;
 import com.g3.parking.service.SiteService;
 
@@ -20,9 +19,6 @@ public class SiteController extends BaseController {
     
     @Autowired
     private SiteService siteService;
-
-    @Autowired
-    private  SiteRepository siteRepository;
     
     // Actualizar múltiples sites en batch
     @PostMapping("/batch-update")

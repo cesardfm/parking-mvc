@@ -1,4 +1,4 @@
-package com.g3.parking.imageprocessing.util;
+package com.g3.parking.service;
 
 import java.util.Base64;
 import java.io.ByteArrayOutputStream;

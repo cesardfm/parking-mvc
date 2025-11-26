@@ -1,4 +1,4 @@
-package com.g3.parking.imageprocessing.model;
+package com.g3.parking.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;

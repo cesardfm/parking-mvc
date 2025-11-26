@@ -1,0 +1,32 @@
+{
+  "databases": {
+    "h2": {
+      "url": "jdbc:h2:file:/data/parkingdb",
+      "username": "sa",
+      "password": "",
+      "driver": "org.h2.Driver",
+      "dialect": "org.hibernate.dialect.H2Dialect"
+    },
+    "postgresql": {
+      "url": "jdbc:postgresql://postgres-db:5432/parkingdb",
+      "username": "parking",
+      "password": "parking123",
+      "driver": "org.postgresql.Driver",
+      "dialect": "org.hibernate.dialect.PostgreSQLDialect"
+    },
+    "mysql": {
+      "url": "jdbc:mysql://localhost:3307/testdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Bogota",
+      "username": "root",
+      "password": "root",
+      "driver": "com.mysql.cj.jdbc.Driver",
+      "dialect": "org.hibernate.dialect.MySQL8Dialect"
+    },
+    "oracle": {
+      "url": "jdbc:oracle:thin:@oracle-db:1521/XEPDB1",
+      "username": "system",
+      "password": "password",
+      "driver": "oracle.jdbc.OracleDriver",
+      "dialect": "org.hibernate.dialect.OracleDialect"
+    }
+  }
+}

@@ -44,7 +44,6 @@
             <artifactId>spring-test</artifactId>
         </dependency>
 
-        <dependency>
 		<dependency>
 			<!-- PDF generation -->
 			<groupId>org.apache.pdfbox</groupId>
@@ -107,6 +106,7 @@
 			<groupId>net.sourceforge.tess4j</groupId>
 			<artifactId>tess4j</artifactId>
 			<version>5.8.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.modelmapper</groupId>
 			<artifactId>modelmapper</artifactId>

@@ -1,0 +1,2 @@
+org.springframework.context.ApplicationListener=\
+com.g3.parking.config.DatabaseConfigLoader

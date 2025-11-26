@@ -28,11 +28,10 @@ public class LevelService extends BaseService {
     }
 
     public LevelDTO findById(Long id){
-        return convert(levelRepo.getReferenceById(id), LevelDTO.class);
+        return convert(levelRepo.findById(id), LevelDTO.class);
     }
 
     public void delete(LevelDTO levelDTO){
-        Level level = convert(levelDTO, Level.class);
-        levelRepo.delete(level);
+        levelRepo.deleteById(levelDTO.getId());
     }
 }
