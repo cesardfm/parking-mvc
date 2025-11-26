@@ -144,7 +144,7 @@ public class TicketService extends BaseService {
             return 0L;
         }
 
-        siteService.changeStatus(ticket.getSite().getId(), "disabled");
+        siteService.changeStatus(ticket.getSite().getId(), "occupied");
         
         return ticketRepository.save(convert(ticket, Ticket.class)).getId();
     }

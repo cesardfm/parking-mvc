@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 @Controller
@@ -28,8 +29,11 @@ public class DashboardController extends BaseController{
         if (userDetails == null)
             return "/login";
         UserDTO user = userService.findByUsername(userDetails.getUsername());
-        if (user.hasRole("ROLE_ADMIN")){
-            return "admin/dashboard";
+        boolean isAdmin = user.getRoles().stream()
+                .anyMatch(role -> "ROLE_ADMIN".equals(role.getName()));
+
+        if (isAdmin && !user.getRoles().stream().anyMatch(role -> "ROLE_OWNER".equals(role.getName()))) {
+            return "redirect:/parking/listar";
         }
         model.addAttribute("recentParkings", parkingService.findByUserOrganization(user));
         

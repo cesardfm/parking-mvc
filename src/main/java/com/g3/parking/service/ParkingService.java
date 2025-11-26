@@ -150,13 +150,10 @@ public class ParkingService extends BaseService {
         // Obtener el admin
         User admin = convert(userService.findById(adminId), User.class);
 
-        // Validar que está asignado
-        if (!parking.hasAdmin(admin)) {
-            throw new RuntimeException("Este administrador no está asignado a este parqueadero");
-        }
-
         // Remover
         parking.removeAdmin(admin);
+
+        // Guardar
         parkingRepository.save(parking);
     }
 
@@ -173,8 +170,28 @@ public class ParkingService extends BaseService {
                 .collect(Collectors.toList());
     }
 
-    public List<Parking> findByAdminId(Long adminId) {
-        if (adminId == null) throw new IllegalArgumentException("adminId no puede ser null");
-        return parkingRepository.findByAdmins_Id(adminId);
+    public List<ParkingDTO> findByAdminId(Long adminId) {
+
+        if (adminId == null) {
+            throw new IllegalArgumentException("adminId no puede ser null");
+        }
+
+
+        List<Parking> parkings = parkingRepository.findByAdmins_Id(adminId);
+
+        for (Parking p : parkings) {
+            System.out.println("  - Parking ID: " + p.getId() + ", Name: " + p.getName());
+        }
+
+        // FIX: Convertir cada 'parking' individual, no toda la lista
+        List<ParkingDTO> result = parkings.stream()
+                .map(parking -> {
+                    ParkingDTO dto = convert(parking, ParkingDTO.class);
+                    System.out.println("  Convertido: " + dto.getName());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        return result;
     }
 }

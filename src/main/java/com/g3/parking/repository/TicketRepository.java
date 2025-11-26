@@ -31,5 +31,15 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
            "LEFT JOIN FETCH v.category " +
            "WHERE t.id = :id")
     Optional<Ticket> findByIdWithRelations(@Param("id") Long id);
+    
+    /**
+     * Busca el ticket activo (sin salida) para un sitio específico
+     */
+    @Query("SELECT t FROM Ticket t " +
+           "LEFT JOIN FETCH t.vehicle v " +
+           "LEFT JOIN FETCH v.category c " +
+           "LEFT JOIN FETCH v.owner o " +
+           "WHERE t.site.id = :siteId AND t.exitTime IS NULL AND t.paid = false")
+    Optional<Ticket> findActiveBySiteId(@Param("siteId") Long siteId);
 }
 

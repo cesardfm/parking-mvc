@@ -68,7 +68,20 @@ public class TicketController extends BaseController {
     @PreAuthorize("hasAnyRole('OWNER','ADMIN','USER')")
     @GetMapping("/listarParkings")
     public String listarParkings(Model model, @ModelAttribute("currentUser") UserDTO currentUser) {
-        model.addAttribute("parkings", parkingService.findByUserOrganization(currentUser));
+        List<ParkingDTO> parkings;
+
+        // Si es ADMIN, mostrar solo los parkings que administra
+        if (currentUser.hasRole("ROLE_ADMIN") && !currentUser.hasRole("ROLE_OWNER")) {
+            parkings = parkingService.findByAdminId(currentUser.getId());
+            model.addAttribute("titulo", "Mis Parqueaderos Asignados");
+        }
+        // Si es OWNER o USER, mostrar todos los parkings de la organización
+        else {
+            parkings = parkingService.findByUserOrganization(currentUser);
+            model.addAttribute("titulo", "Parqueaderos de la Organización");
+        }
+
+        model.addAttribute("parkings", parkings);
         return "ticket/listParkings";
     }
 
@@ -410,109 +423,5 @@ public class TicketController extends BaseController {
             return ResponseEntity.status(500).build();
         }
     }
-
-    /*
-     * @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
-     * 
-     * @GetMapping("/editar/{id}")
-     * public String mostrarFormularioEditar(
-     * 
-     * @PathVariable("id") Long id,
-     * Model model,
-     * 
-     * @ModelAttribute("currentUser") User currentUser) {
-     * 
-     * try {
-     * log.info("Current User ID: {}", currentUser.getId());
-     * log.info("Current User Class: {}", currentUser.getClass().getName());
-     * Ticket ticket = ticketService.findById(id);
-     * if (ticket == null) {
-     * model.addAttribute("error", "Ticket no encontrado");
-     * return "redirect:/tickets/listarParkings";
-     * }
-     * 
-     * // Validar organización
-     * parkingService.findByIdAndValidateOrganization(
-     * ticket.getParking().getId(),
-     * currentUser);
-     * 
-     * model.addAttribute("ticket", ticket);
-     * model.addAttribute("categories", vehicleCategoryService.getAll());
-     * return "ticket/form";
-     * } catch (IllegalArgumentException e) {
-     * model.addAttribute("error", "No autorizado");
-     * return "redirect:/tickets/listarParkings";
-     * }
-     * }
-     */
-
-    /*
-     * @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
-     * 
-     * @PostMapping("/actualizar/{id}")
-     * public String actualizarTicket(
-     * 
-     * @PathVariable Long id,
-     * 
-     * @RequestParam("color") String color,
-     * 
-     * @RequestParam("licensePlate") String licensePlate,
-     * 
-     * @RequestParam("categoryId") Long categoryId,
-     * 
-     * @RequestParam(value = "paid", defaultValue = "false") boolean paid,
-     * Model model,
-     * 
-     * @ModelAttribute("currentUser") User currentUser) {
-     * 
-     * try {
-     * 
-     * Ticket ticket = ticketService.findById(id);
-     * 
-     * if (ticket == null) {
-     * model.addAttribute("error", "No se encontró el tiquete");
-     * return "redirect:/tickets/listarParkings";
-     * }
-     * 
-     * log.info("ANTES: ");
-     * Vehicle vehicle = vehicleService.findByLicensePlate(licensePlate);
-     * log.info("DESPUES: ");
-     * 
-     * boolean needsNewVehicle = false;
-     * 
-     * if (vehicle == null) {
-     * needsNewVehicle = true;
-     * } else {
-     * // Solo verificar si el vehículo existe
-     * if (!color.equalsIgnoreCase(vehicle.getColor()) ||
-     * !categoryId.equals(vehicle.getCategory().getId())) {
-     * needsNewVehicle = true;
-     * }
-     * }
-     * 
-     * if (needsNewVehicle) {
-     * // Crear nuevo vehículo
-     * vehicle = vehicleService.createVehicle(licensePlate, color, categoryId,
-     * null);
-     * log.info("Nuevo vehículo creado: {}", vehicle.getLicensePlate());
-     * }
-     * 
-     * ticket.setVehicle(vehicle);
-     * ticket.setPaid(paid);
-     * 
-     * ticketService.save(ticket);
-     * 
-     * return "redirect:/tickets/detail/" + id;
-     * 
-     * } catch (IllegalArgumentException e) {
-     * model.addAttribute("error", "No autorizado para actualizar este ticket");
-     * return "redirect:/tickets/detail/" + id;
-     * } catch (Exception e) {
-     * model.addAttribute("error", e);
-     * log.info("ERROR: ", e);
-     * return "redirect:/tickets/editar/" + id;
-     * }
-     * }
-     */
 
 }
